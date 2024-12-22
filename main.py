@@ -17,7 +17,7 @@ app_mode = st.sidebar.selectbox("Select Page", ["Home", "About", "Disease Recogn
 
 # Main Page
 if app_mode == "Home":
-    st.header("PLANT DISEASE RECOGNITION SYSTEM")
+    st.header("COTTON CROP DISEASE RECOGNITION SYSTEM")
     image_path = "home_page.png"
     st.image(image_path, use_column_width=True)
     st.markdown("""
@@ -52,6 +52,9 @@ elif app_mode == "About":
     #### Content
     1. Train (6251 images)
     2. Validation (1563 images)
+
+
+    #### Developed by Akshat, Himanshu, Minav, Vedansh 
     """)
 
 elif app_mode == "Disease Recognition":
