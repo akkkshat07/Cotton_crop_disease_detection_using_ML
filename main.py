@@ -24,9 +24,9 @@ if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 if 'user_data' not in st.session_state:
     st.session_state.user_data = None
-# Add theme state
-if 'theme_mode' not in st.session_state:
-    st.session_state.theme_mode = 'light'
+# Remove theme state - only dark mode
+# if 'theme_mode' not in st.session_state:
+#     st.session_state.theme_mode = 'light'
 
 # Initialize database
 def init_database():
@@ -172,63 +172,69 @@ def logout():
             del st.session_state[key]
     safe_rerun()  # replaced st.rerun()
 
-# Enhanced CSS styling with optimized theme support and improved backgrounds
+# Optimized CSS styling with permanent dark theme and background image
 def load_css():
-    # Get current theme
-    theme = st.session_state.get('theme_mode', 'light')
-    
-    # Define optimized theme variables with gradients and better colors
-    if theme == 'dark':
-        theme_vars = """
-        --primary-color: #4CAF50;
-        --secondary-color: #81C784;
-        --accent-color: #388E3C;
-        --background-color: linear-gradient(135deg, #121212 0%, #1e1e1e 100%);
-        --card-bg: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
-        --text-color: #ffffff;
-        --secondary-text: #b0b0b0;
-        --border-color: #555555;
-        --input-bg: linear-gradient(135deg, #404040 0%, #4a4a4a 100%);
-        --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-        --hover-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-        --gradient-primary: linear-gradient(135deg, #4CAF50, #388E3C);
-        --gradient-secondary: linear-gradient(135deg, #81C784, #4CAF50);
-        """
-    else:
-        theme_vars = """
-        --primary-color: #2E7D32;
-        --secondary-color: #66BB6A;
-        --accent-color: #1B5E20;
-        --background-color: linear-gradient(135deg, #f0f8f0 0%, #e8f5e8 100%);
-        --card-bg: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
-        --text-color: #2c3e50;
-        --secondary-text: #7f8c8d;
-        --border-color: #e0e0e0;
-        --input-bg: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
-        --shadow: 0 4px 20px rgba(46, 125, 50, 0.1);
-        --hover-shadow: 0 8px 30px rgba(46, 125, 50, 0.15);
-        --gradient-primary: linear-gradient(135deg, #2E7D32, #1B5E20);
-        --gradient-secondary: linear-gradient(135deg, #66BB6A, #2E7D32);
-        """
+    # Permanent dark theme only
+    theme_vars = """
+    --primary-color: #4CAF50;
+    --secondary-color: #81C784;
+    --accent-color: #388E3C;
+    --background-color: #0a0a0a;
+    --card-bg: linear-gradient(135deg, rgba(45, 45, 45, 0.95) 0%, rgba(58, 58, 58, 0.95) 100%);
+    --text-color: #ffffff;
+    --secondary-text: #b0b0b0;
+    --border-color: #555555;
+    --input-bg: linear-gradient(135deg, rgba(64, 64, 64, 0.9) 0%, rgba(74, 74, 74, 0.9) 100%);
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    --hover-shadow: 0 12px 40px rgba(76, 175, 80, 0.3);
+    --gradient-primary: linear-gradient(135deg, #4CAF50, #388E3C);
+    --gradient-secondary: linear-gradient(135deg, #81C784, #4CAF50);
+    --glass-bg: rgba(45, 45, 45, 0.8);
+    --backdrop-blur: blur(20px);
+    """
     
     st.markdown(f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
     
     :root {{
         {theme_vars}
-        --border-radius: 15px;
-        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --border-radius: 20px;
+        --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        --glow: 0 0 20px rgba(76, 175, 80, 0.3);
     }}
     
-    /* Optimized base app styling with enhanced background */
+    /* Optimized base app styling with background image */
     .stApp {{
         background: var(--background-color);
-        background-attachment: fixed;
         font-family: 'Poppins', sans-serif;
         color: var(--text-color);
         min-height: 100vh;
         transition: var(--transition);
+        position: relative;
+    }}
+    
+    /* Background image for homepage */
+    .homepage-bg {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('file:///C:/Users/aksha/OneDrive/Desktop/Cotton_crop_disease_detection_using_ML/home_page.png') no-repeat center center;
+        background-size: cover;
+        opacity: 0.15;
+        z-index: -1;
+    }}
+    
+    .homepage-bg::after {{
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 100%);
     }}
     
     /* Hide empty containers and fix layout issues */
@@ -238,77 +244,74 @@ def load_css():
         display: none !important;
     }}
     
-    /* Fix main content area with better spacing */
+    /* Enhanced main content area */
     .main .block-container {{
-        padding-top: 2rem;
+        padding: 2rem 1rem;
         max-width: 100%;
         transition: var(--transition);
+        position: relative;
+        z-index: 1;
     }}
     
-    /* Enhanced header styling with gradient text */
+    /* Premium header styling with glow effect */
     .main-header {{
         text-align: center;
         background: var(--gradient-primary);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        font-size: 3.5rem;
+        font-size: 4rem;
         font-weight: 800;
-        margin-bottom: 2rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 3rem;
+        text-shadow: var(--glow);
         transition: var(--transition);
+        letter-spacing: 2px;
+        position: relative;
     }}
     
-    /* Improved theme toggle button */
-    .theme-toggle {{
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-        background: var(--card-bg);
-        border: 2px solid var(--border-color);
-        border-radius: 50px;
-        padding: 12px 24px;
-        cursor: pointer;
-        box-shadow: var(--shadow);
-        transition: var(--transition);
-        backdrop-filter: blur(10px);
+    .main-header::after {{
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: var(--gradient-primary);
+        border-radius: 2px;
+        box-shadow: var(--glow);
     }}
     
-    .theme-toggle:hover {{
-        transform: translateY(-3px) scale(1.05);
-        box-shadow: var(--hover-shadow);
-        border-color: var(--primary-color);
-    }}
-    
-    /* Enhanced Authentication styling with improved backgrounds */
+    /* Glass morphism authentication styling */
     .auth-section {{
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 70vh;
+        min-height: 80vh;
         padding: 2rem 0;
         transition: var(--transition);
+        position: relative;
     }}
     
     .auth-container {{
-        background: var(--card-bg);
-        padding: 3.5rem 3rem;
+        background: var(--glass-bg);
+        backdrop-filter: var(--backdrop-blur);
+        padding: 4rem 3.5rem;
         border-radius: var(--border-radius);
         box-shadow: var(--shadow);
         margin: 0 auto;
-        max-width: 520px;
+        max-width: 580px;
         width: 100%;
-        border: 2px solid var(--border-color);
+        border: 2px solid rgba(76, 175, 80, 0.3);
         color: var(--text-color);
         position: relative;
-        backdrop-filter: blur(15px);
         transition: var(--transition);
     }}
     
     .auth-container:hover {{
         box-shadow: var(--hover-shadow);
-        transform: translateY(-2px);
+        transform: translateY(-5px);
+        border-color: var(--primary-color);
     }}
     
     .auth-container::before {{
@@ -317,80 +320,85 @@ def load_css():
         top: 0;
         left: 0;
         right: 0;
-        height: 5px;
+        height: 6px;
         background: var(--gradient-primary);
         border-radius: var(--border-radius) var(--border-radius) 0 0;
+        box-shadow: var(--glow);
     }}
     
     .auth-header {{
         text-align: center;
-        margin-bottom: 2.5rem;
+        margin-bottom: 3rem;
         color: var(--primary-color);
-        font-weight: 700;
-        font-size: 2.2rem;
+        font-weight: 800;
+        font-size: 2.5rem;
         position: relative;
         transition: var(--transition);
+        text-shadow: var(--glow);
     }}
     
     .auth-header::after {{
         content: '';
         position: absolute;
-        bottom: -12px;
+        bottom: -15px;
         left: 50%;
         transform: translateX(-50%);
-        width: 60px;
+        width: 80px;
         height: 4px;
         background: var(--gradient-secondary);
         border-radius: 2px;
+        box-shadow: var(--glow);
     }}
     
-    /* Enhanced form styling with better backgrounds */
+    /* Premium form styling */
     .stTextInput > div > div > input {{
         background: var(--input-bg) !important;
-        border: 2px solid var(--border-color) !important;
-        border-radius: 12px !important;
-        padding: 18px 22px !important;
+        backdrop-filter: var(--backdrop-blur) !important;
+        border: 2px solid rgba(76, 175, 80, 0.3) !important;
+        border-radius: 15px !important;
+        padding: 20px 25px !important;
         font-size: 16px !important;
         color: var(--text-color) !important;
         font-family: 'Poppins', sans-serif !important;
         transition: var(--transition) !important;
-        box-shadow: inset 0 2px 8px rgba(0,0,0,0.05) !important;
+        box-shadow: inset 0 2px 10px rgba(0,0,0,0.3) !important;
     }}
     
     .stTextInput > div > div > input:focus {{
         border-color: var(--primary-color) !important;
-        box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.2) !important;
+        box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.3), var(--glow) !important;
         background: var(--card-bg) !important;
         transform: translateY(-2px) !important;
     }}
     
     .stTextInput > label {{
-        color: var(--text-color) !important;
-        font-weight: 600 !important;
-        font-size: 15px !important;
-        margin-bottom: 10px !important;
+        color: var(--primary-color) !important;
+        font-weight: 700 !important;
+        font-size: 16px !important;
+        margin-bottom: 12px !important;
         font-family: 'Poppins', sans-serif !important;
         text-transform: uppercase;
-        letter-spacing: 0.8px;
+        letter-spacing: 1px;
         transition: var(--transition) !important;
+        text-shadow: var(--glow);
     }}
     
-    /* Improved button styling with gradients */
+    /* Premium button styling with animations */
     .stButton > button {{
         background: var(--gradient-primary) !important;
         color: white !important;
         border: none !important;
-        border-radius: 12px !important;
-        padding: 18px 2.5rem !important;
-        font-weight: 600 !important;
+        border-radius: 15px !important;
+        padding: 20px 3rem !important;
+        font-weight: 700 !important;
         font-size: 16px !important;
         transition: var(--transition) !important;
         box-shadow: var(--shadow) !important;
         width: 100% !important;
         font-family: 'Poppins', sans-serif !important;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-top: 1.5rem !important;
+        letter-spacing: 1.5px;
+        margin-top: 2rem !important;
         position: relative;
         overflow: hidden;
     }}
@@ -402,8 +410,8 @@ def load_css():
         left: -100%;
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        transition: left 0.5s;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.6s;
     }}
     
     .stButton > button:hover {{
@@ -418,51 +426,51 @@ def load_css():
     
     /* Enhanced alert styling */
     .alert-success {{
-        background: linear-gradient(135deg, #d4edda, #c3e6cb) !important;
-        color: #155724 !important;
-        border: 2px solid #28a745 !important;
+        background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(40, 167, 69, 0.1)) !important;
+        color: #4CAF50 !important;
+        border: 2px solid #4CAF50 !important;
         border-radius: var(--border-radius) !important;
-        padding: 1.5rem !important;
+        padding: 1.8rem !important;
         margin: 2rem 0 !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important;
         font-family: 'Poppins', sans-serif !important;
         box-shadow: var(--shadow) !important;
-        animation: slideIn 0.4s ease !important;
-        backdrop-filter: blur(10px);
+        animation: slideIn 0.5s ease !important;
+        backdrop-filter: var(--backdrop-blur);
     }}
     
     .alert-error {{
-        background: linear-gradient(135deg, #f8d7da, #f5c6cb) !important;
-        color: #721c24 !important;
-        border: 2px solid #dc3545 !important;
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.2), rgba(220, 53, 69, 0.1)) !important;
+        color: #ff6b6b !important;
+        border: 2px solid #ff6b6b !important;
         border-radius: var(--border-radius) !important;
-        padding: 1.5rem !important;
+        padding: 1.8rem !important;
         margin: 2rem 0 !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important;
         font-family: 'Poppins', sans-serif !important;
         box-shadow: var(--shadow) !important;
-        animation: slideIn 0.4s ease !important;
-        backdrop-filter: blur(10px);
+        animation: slideIn 0.5s ease !important;
+        backdrop-filter: var(--backdrop-blur);
     }}
     
     .alert-warning {{
-        background: linear-gradient(135deg, #fff3cd, #ffeaa7) !important;
-        color: #856404 !important;
-        border: 2px solid #ffc107 !important;
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 193, 7, 0.1)) !important;
+        color: #ffd93d !important;
+        border: 2px solid #ffd93d !important;
         border-radius: var(--border-radius) !important;
-        padding: 1.5rem !important;
+        padding: 1.8rem !important;
         margin: 2rem 0 !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important;
         font-family: 'Poppins', sans-serif !important;
         box-shadow: var(--shadow) !important;
-        animation: slideIn 0.4s ease !important;
-        backdrop-filter: blur(10px);
+        animation: slideIn 0.5s ease !important;
+        backdrop-filter: var(--backdrop-blur);
     }}
     
     @keyframes slideIn {{
         from {{
             opacity: 0;
-            transform: translateY(-15px);
+            transform: translateY(-20px);
         }}
         to {{
             opacity: 1;
@@ -470,26 +478,26 @@ def load_css():
         }}
     }}
     
-    /* Enhanced tab styling */
+    /* Premium tab styling */
     .stTabs [data-baseweb="tab-list"] {{
-        gap: 15px;
+        gap: 20px;
         background: transparent;
         justify-content: center;
-        margin-bottom: 2.5rem;
+        margin-bottom: 3rem;
         transition: var(--transition);
     }}
     
     .stTabs [data-baseweb="tab"] {{
-        background: var(--card-bg) !important;
-        border-radius: 30px !important;
-        padding: 14px 35px !important;
-        font-weight: 600 !important;
-        border: 2px solid var(--border-color) !important;
+        background: var(--glass-bg) !important;
+        backdrop-filter: var(--backdrop-blur) !important;
+        border-radius: 25px !important;
+        padding: 16px 40px !important;
+        font-weight: 700 !important;
+        border: 2px solid rgba(76, 175, 80, 0.3) !important;
         color: var(--text-color) !important;
         font-family: 'Poppins', sans-serif !important;
         transition: var(--transition) !important;
         box-shadow: var(--shadow) !important;
-        backdrop-filter: blur(10px);
     }}
     
     .stTabs [aria-selected="true"] {{
@@ -500,126 +508,165 @@ def load_css():
         box-shadow: var(--hover-shadow) !important;
     }}
     
-    /* Improved validation styling */
+    /* Enhanced validation styling */
     .validation-check {{
         display: flex;
         align-items: center;
-        gap: 10px;
-        font-size: 13px;
-        margin-top: 6px;
+        gap: 12px;
+        font-size: 14px;
+        margin-top: 8px;
         color: var(--secondary-text);
         transition: var(--transition);
+        font-weight: 500;
     }}
     
     .validation-check.valid {{
-        color: #28a745;
+        color: #4CAF50;
         font-weight: 600;
+        text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
     }}
     
     .validation-check.invalid {{
-        color: #dc3545;
+        color: #ff6b6b;
         font-weight: 600;
+        text-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
     }}
     
-    /* Enhanced info section styling */
+    /* Premium info section styling */
     .info-section {{
-        background: var(--card-bg);
-        border: 2px solid var(--border-color);
+        background: var(--glass-bg);
+        backdrop-filter: var(--backdrop-blur);
+        border: 2px solid rgba(76, 175, 80, 0.3);
         border-radius: var(--border-radius);
-        margin: 3rem 0;
-        padding: 4rem 3rem;
+        margin: 4rem 0;
+        padding: 5rem 4rem;
         text-align: center;
         box-shadow: var(--shadow);
-        backdrop-filter: blur(15px);
         transition: var(--transition);
+        position: relative;
+    }}
+    
+    .info-section::before {{
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--gradient-primary);
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+        box-shadow: var(--glow);
     }}
     
     .info-grid {{
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 2.5rem;
-        margin-top: 4rem;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 3rem;
+        margin-top: 5rem;
     }}
     
     .info-card {{
-        background: var(--card-bg);
-        border: 2px solid var(--border-color);
+        background: var(--glass-bg);
+        backdrop-filter: var(--backdrop-blur);
+        border: 2px solid rgba(76, 175, 80, 0.2);
         border-radius: var(--border-radius);
-        padding: 2rem;
+        padding: 2.5rem;
         box-shadow: var(--shadow);
         transition: var(--transition);
-        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }}
+    
+    .info-card::before {{
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--gradient-primary);
+        transform: scaleX(0);
+        transition: transform 0.3s;
     }}
     
     .info-card:hover {{
-        transform: translateY(-8px) scale(1.02);
+        transform: translateY(-10px) scale(1.03);
         box-shadow: var(--hover-shadow);
         border-color: var(--primary-color);
     }}
     
-    .info-card h3 {{
-        color: var(--primary-color);
-        font-weight: 700;
-        margin-bottom: 1.5rem;
-        font-size: 1.4rem;
-        transition: var(--transition);
-    }}
-    
-    .info-card p {{
-        color: var(--text-color);
-        line-height: 1.7;
-        font-size: 1rem;
-        transition: var(--transition);
+    .info-card:hover::before {{
+        transform: scaleX(1);
     }}
     
     /* Enhanced sidebar styling */
     .css-1d391kg {{
-        background: var(--card-bg) !important;
+        background: var(--glass-bg) !important;
+        backdrop-filter: var(--backdrop-blur) !important;
         color: var(--text-color) !important;
-        border-right: 2px solid var(--border-color) !important;
-        backdrop-filter: blur(15px);
+        border-right: 2px solid rgba(76, 175, 80, 0.3) !important;
         transition: var(--transition);
     }}
     
-    /* Improved feature box styling */
+    /* Premium feature box styling */
     .feature-box {{
-        background: var(--card-bg);
-        padding: 2.5rem;
+        background: var(--glass-bg);
+        backdrop-filter: var(--backdrop-blur);
+        padding: 3rem;
         border-radius: var(--border-radius);
         box-shadow: var(--shadow);
-        margin: 1.5rem 0;
-        border: 2px solid var(--border-color);
+        margin: 2rem 0;
+        border: 2px solid rgba(76, 175, 80, 0.2);
         transition: var(--transition);
-        height: 220px;
+        height: 250px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         color: var(--text-color);
-        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }}
+    
+    .feature-box::before {{
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--gradient-primary);
+        transform: scaleX(0);
+        transition: transform 0.3s;
     }}
     
     .feature-box:hover {{
-        transform: translateY(-8px) scale(1.02);
+        transform: translateY(-10px) scale(1.03);
         border-color: var(--primary-color);
         box-shadow: var(--hover-shadow);
     }}
     
+    .feature-box:hover::before {{
+        transform: scaleX(1);
+    }}
+    
     .feature-box h3 {{
         color: var(--primary-color);
-        font-weight: 700;
+        font-weight: 800;
         margin-bottom: 1.5rem;
-        font-size: 1.4rem;
+        font-size: 1.5rem;
         transition: var(--transition);
+        text-shadow: var(--glow);
     }}
     
     .feature-box p {{
         color: var(--text-color);
-        line-height: 1.7;
-        font-size: 1rem;
+        line-height: 1.8;
+        font-size: 1.1rem;
         transition: var(--transition);
+        font-weight: 400;
     }}
     
-    /* Enhanced general text styling */
+    /* Enhanced general styling */
     .stMarkdown, .stMarkdown p, .stMarkdown li, .stMarkdown div {{
         color: var(--text-color) !important;
         font-family: 'Poppins', sans-serif !important;
@@ -627,17 +674,31 @@ def load_css():
     }}
     
     .stSelectbox label, .stNumberInput label, .stDateInput label {{
-        color: var(--text-color) !important;
-        font-weight: 600 !important;
+        color: var(--primary-color) !important;
+        font-weight: 700 !important;
         font-family: 'Poppins', sans-serif !important;
         transition: var(--transition) !important;
+        text-shadow: var(--glow);
     }}
     
-    /* Improved checkbox styling */
     .stCheckbox > label {{
         color: var(--text-color) !important;
         font-family: 'Poppins', sans-serif !important;
         transition: var(--transition) !important;
+        font-weight: 500;
+    }}
+    
+    /* Welcome message styling */
+    .welcome-message {{
+        background: var(--glass-bg);
+        backdrop-filter: var(--backdrop-blur);
+        border: 2px solid rgba(76, 175, 80, 0.3);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin: 2rem 0;
+        text-align: center;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
     }}
     
     /* Hide empty spaces */
@@ -649,17 +710,35 @@ def load_css():
     #MainMenu {{visibility: hidden;}}
     footer {{visibility: hidden;}}
     header {{visibility: hidden;}}
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {{
+        width: 8px;
+    }}
+    
+    ::-webkit-scrollbar-track {{
+        background: rgba(0,0,0,0.1);
+    }}
+    
+    ::-webkit-scrollbar-thumb {{
+        background: var(--gradient-primary);
+        border-radius: 4px;
+    }}
+    
+    ::-webkit-scrollbar-thumb:hover {{
+        background: var(--gradient-secondary);
+    }}
     </style>
     """, unsafe_allow_html=True)
 
-# Add theme toggle function
-def toggle_theme():
-    """Toggle between light and dark themes"""
-    if st.session_state.theme_mode == 'light':
-        st.session_state.theme_mode = 'dark'
-    else:
-        st.session_state.theme_mode = 'light'
-    safe_rerun()
+# Remove theme toggle function - not needed for permanent dark mode
+# def toggle_theme():
+#     """Toggle between light and dark themes"""
+#     if st.session_state.theme_mode == 'light':
+#         st.session_state.theme_mode = 'dark'
+#     else:
+#         st.session_state.theme_mode = 'light'
+#     safe_rerun()
 
 # Load the trained model
 @st.cache_resource
@@ -864,15 +943,18 @@ def show_password_requirements(password):
 
 # Main application logic
 if not st.session_state.authenticated:
-    # Theme toggle button
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col3:
-        theme_icon = "🌙" if st.session_state.theme_mode == 'light' else "☀️"
-        theme_text = "Dark Mode" if st.session_state.theme_mode == 'light' else "Light Mode"
-        if st.button(f"{theme_icon} {theme_text}", key="theme_toggle"):
-            toggle_theme()
+    # Add background image for homepage
+    st.markdown('<div class="homepage-bg"></div>', unsafe_allow_html=True)
     
-    # Enhanced Authentication interface with no empty boxes
+    # Remove theme toggle button - not needed
+    # col1, col2, col3 = st.columns([1, 1, 1])
+    # with col3:
+    #     theme_icon = "🌙" if st.session_state.theme_mode == 'light' else "☀️"
+    #     theme_text = "Dark Mode" if st.session_state.theme_mode == 'light' else "Light Mode"
+    #     if st.button(f"{theme_icon} {theme_text}", key="theme_toggle"):
+    #         toggle_theme()
+    
+    # Enhanced Authentication interface
     st.markdown('<h1 class="main-header">🌱 COTTON DISEASE DETECTION SYSTEM 🌱</h1>', unsafe_allow_html=True)
     
     # Single centered container for authentication
@@ -888,7 +970,7 @@ if not st.session_state.authenticated:
         with tab1:
             st.markdown('<div class="auth-container">', unsafe_allow_html=True)
             st.markdown('<h2 class="auth-header">👋 Welcome Back!</h2>', unsafe_allow_html=True)
-            st.markdown('<p style="text-align: center; color: var(--secondary-text); margin-bottom: 2rem;">Sign in to continue to your dashboard</p>', unsafe_allow_html=True)
+            st.markdown('<p style="text-align: center; color: var(--secondary-text); margin-bottom: 2rem; font-size: 1.1rem; font-weight: 500;">Sign in to continue to your dashboard</p>', unsafe_allow_html=True)
             
             with st.form("login_form", clear_on_submit=False):
                 login_username = st.text_input(
@@ -944,7 +1026,7 @@ if not st.session_state.authenticated:
         with tab2:
             st.markdown('<div class="auth-container">', unsafe_allow_html=True)
             st.markdown('<h2 class="auth-header">🌟 Join Us Today!</h2>', unsafe_allow_html=True)
-            st.markdown('<p style="text-align: center; color: var(--secondary-text); margin-bottom: 2rem;">Create your account to start protecting your crops</p>', unsafe_allow_html=True)
+            st.markdown('<p style="text-align: center; color: var(--secondary-text); margin-bottom: 2rem; font-size: 1.1rem; font-weight: 500;">Create your account to start protecting your crops</p>', unsafe_allow_html=True)
             
             with st.form("register_form", clear_on_submit=False):
                 reg_username = st.text_input(
@@ -1072,31 +1154,31 @@ if not st.session_state.authenticated:
     # Enhanced information section
     st.markdown("""
     <div class="info-section">
-        <h3 style="color: var(--primary-color); font-size: 2rem; margin-bottom: 1rem;">🌿 Transform Your Cotton Farming</h3>
-        <p style="font-size: 1.2rem; color: var(--secondary-text); line-height: 1.8; max-width: 800px; margin: 0 auto 2rem;">
+        <h3 style="color: var(--primary-color); font-size: 2.5rem; margin-bottom: 1.5rem; font-weight: 800; text-shadow: var(--glow);">🌿 Transform Your Cotton Farming</h3>
+        <p style="font-size: 1.3rem; color: var(--secondary-text); line-height: 2; max-width: 900px; margin: 0 auto 2rem; font-weight: 400;">
             Join thousands of farmers worldwide who trust our AI-powered disease detection system. 
             Protect your crops, increase yields, and farm smarter with cutting-edge technology.
         </p>
         <div class="info-grid">
             <div class="info-card">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
-                <div style="font-weight: 700; font-size: 1.1rem; color: var(--primary-color);">98.9% Accuracy</div>
-                <div style="color: var(--secondary-text); margin-top: 0.5rem;">Industry-leading precision</div>
+                <div style="font-size: 4rem; margin-bottom: 1.5rem;">🎯</div>
+                <div style="font-weight: 800; font-size: 1.3rem; color: var(--primary-color); text-shadow: var(--glow);">98.9% Accuracy</div>
+                <div style="color: var(--secondary-text); margin-top: 0.8rem; font-size: 1.1rem;">Industry-leading precision</div>
             </div>
             <div class="info-card">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
-                <div style="font-weight: 700; font-size: 1.1rem; color: var(--primary-color);">Instant Analysis</div>
-                <div style="color: var(--secondary-text); margin-top: 0.5rem;">Results in seconds</div>
+                <div style="font-size: 4rem; margin-bottom: 1.5rem;">⚡</div>
+                <div style="font-weight: 800; font-size: 1.3rem; color: var(--primary-color); text-shadow: var(--glow);">Instant Analysis</div>
+                <div style="color: var(--secondary-text); margin-top: 0.8rem; font-size: 1.1rem;">Results in seconds</div>
             </div>
             <div class="info-card">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🌱</div>
-                <div style="font-weight: 700; font-size: 1.1rem; color: var(--primary-color);">9 Disease Types</div>
-                <div style="color: var(--secondary-text); margin-top: 0.5rem;">Comprehensive detection</div>
+                <div style="font-size: 4rem; margin-bottom: 1.5rem;">🌱</div>
+                <div style="font-weight: 800; font-size: 1.3rem; color: var(--primary-color); text-shadow: var(--glow);">9 Disease Types</div>
+                <div style="color: var(--secondary-text); margin-top: 0.8rem; font-size: 1.1rem;">Comprehensive detection</div>
             </div>
             <div class="info-card">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
-                <div style="font-weight: 700; font-size: 1.1rem; color: var(--primary-color);">Expert Guidance</div>
-                <div style="color: var(--secondary-text); margin-top: 0.5rem;">Treatment recommendations</div>
+                <div style="font-size: 4rem; margin-bottom: 1.5rem;">🛡️</div>
+                <div style="font-weight: 800; font-size: 1.3rem; color: var(--primary-color); text-shadow: var(--glow);">Expert Guidance</div>
+                <div style="color: var(--secondary-text); margin-top: 0.8rem; font-size: 1.1rem;">Treatment recommendations</div>
             </div>
         </div>
     </div>
@@ -1104,23 +1186,23 @@ if not st.session_state.authenticated:
 
 else:
     # Main application for authenticated users
-    # Theme toggle in sidebar
+    # Enhanced sidebar with premium styling
     with st.sidebar:
         st.markdown(f"""
-        <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 10px; margin-bottom: 1rem;">
-            <h3 style="color: white; margin: 0;">👋 Welcome!</h3>
-            <p style="color: white; margin: 0; font-weight: 500;">{st.session_state.user_data['username']}</p>
+        <div style="text-align: center; padding: 1.5rem; background: var(--gradient-primary); border-radius: 15px; margin-bottom: 1.5rem; box-shadow: var(--shadow);">
+            <h3 style="color: white; margin: 0; font-weight: 800; text-shadow: var(--glow);">👋 Welcome!</h3>
+            <p style="color: white; margin: 0; font-weight: 600; font-size: 1.1rem;">{st.session_state.user_data['username']}</p>
         </div>
         """, unsafe_allow_html=True)
         
-        # Theme toggle
-        st.markdown("---")
-        theme_icon = "🌙" if st.session_state.theme_mode == 'light' else "☀️"
-        theme_text = "Dark Mode" if st.session_state.theme_mode == 'light' else "Light Mode"
-        if st.button(f"{theme_icon} {theme_text}", key="sidebar_theme_toggle"):
-            toggle_theme()
+        # Remove theme toggle - not needed for permanent dark mode
+        # st.markdown("---")
+        # theme_icon = "🌙" if st.session_state.theme_mode == 'light' else "☀️"
+        # theme_text = "Dark Mode" if st.session_state.theme_mode == 'light' else "Light Mode"
+        # if st.button(f"{theme_icon} {theme_text}", key="sidebar_theme_toggle"):
+        #     toggle_theme()
         
-        # Navigation
+        # Enhanced Navigation
         st.markdown("### 🧭 Navigation")
         app_mode = st.selectbox(
             "Choose a page:",
@@ -1135,7 +1217,7 @@ else:
         **Classes:** 9 diseases  
         **Image Size:** 128x128  
         **Last Updated:** Aug 2025  
-        **GPT-5 Preview:** {"Enabled ✅" if GPT5_PREVIEW_ENABLED else "Disabled"}  
+        **Status:** Active & Optimized ✅  
         """)
         
         st.markdown("---")
@@ -1144,17 +1226,22 @@ else:
 
     # Main content based on selected page
     if app_mode == "🏠 Home":
+        # Add background image for authenticated homepage too
+        st.markdown('<div class="homepage-bg"></div>', unsafe_allow_html=True)
+        
         st.markdown('<h1 class="main-header">🌱 COTTON CROP DISEASE DETECTION SYSTEM 🌱</h1>', unsafe_allow_html=True)
         
-        # Welcome message
+        # Enhanced welcome message
         st.markdown(f"""
-        <div style="text-align: center; font-size: 1.2rem; margin: 2rem 0; padding: 1.5rem; background: var(--card-bg); border-radius: 10px; box-shadow: var(--shadow);">
-            Welcome back, <strong>{st.session_state.user_data['username']}</strong>! 🌿  
-            Use our AI-powered system to detect cotton diseases instantly.
+        <div class="welcome-message">
+            <h2 style="color: var(--primary-color); margin-bottom: 1rem; font-weight: 800; text-shadow: var(--glow);">Welcome back, {st.session_state.user_data['username']}! 🌿</h2>
+            <p style="font-size: 1.2rem; color: var(--text-color); margin: 0; font-weight: 500;">
+                Use our AI-powered system to detect cotton diseases instantly and protect your crops.
+            </p>
         </div>
         """, unsafe_allow_html=True)
         
-        # Feature highlights
+        # Enhanced feature highlights
         st.markdown("## ✨ Key Features")
         
         col1, col2, col3 = st.columns(3)
@@ -1163,7 +1250,7 @@ else:
             st.markdown("""
             <div class="feature-box">
                 <h3>🎯 High Accuracy</h3>
-                <p>Advanced CNN architecture trained on thousands of cotton images for reliable disease detection.</p>
+                <p>Advanced CNN architecture trained on thousands of cotton images for reliable disease detection with 98.9% accuracy.</p>
             </div>
             """, unsafe_allow_html=True)
         
@@ -1171,7 +1258,7 @@ else:
             st.markdown("""
             <div class="feature-box">
                 <h3>⚡ Instant Results</h3>
-                <p>Get disease predictions in seconds with detailed confidence scores and treatment recommendations.</p>
+                <p>Get disease predictions in seconds with detailed confidence scores and comprehensive treatment recommendations.</p>
             </div>
             """, unsafe_allow_html=True)
         
@@ -1179,7 +1266,7 @@ else:
             st.markdown("""
             <div class="feature-box">
                 <h3>📊 Analytics Dashboard</h3>
-                <p>Track your prediction history and analyze disease patterns with interactive charts and insights.</p>
+                <p>Track your prediction history and analyze disease patterns with interactive charts and detailed insights.</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -1697,8 +1784,9 @@ else:
 # Footer
 st.markdown("---")
 st.markdown("""
-<div style="text-align: center; color: #666; font-size: 0.9rem; padding: 1rem;">
-    🌱 Cotton Disease Detection System v2.0
+<div style="text-align: center; color: var(--secondary-text); font-size: 1rem; padding: 2rem; background: var(--glass-bg); backdrop-filter: var(--backdrop-blur); border-radius: 15px; margin-top: 3rem; border: 1px solid rgba(76, 175, 80, 0.2);">
+    <p style="margin: 0; font-weight: 600;">🌱 Cotton Disease Detection System v2.0 - Powered by AI</p>
+    <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--secondary-text);">Advanced Agricultural Technology for Better Crop Management</p>
 </div>
 """, unsafe_allow_html=True)
 
