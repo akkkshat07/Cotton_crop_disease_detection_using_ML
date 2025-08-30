@@ -169,7 +169,7 @@ def logout():
             del st.session_state[key]
     st.rerun()
 
-# Enhanced CSS styling with better visibility
+# Enhanced CSS styling with better visibility and theme fixes
 def load_css():
     st.markdown("""
     <style>
@@ -183,11 +183,14 @@ def load_css():
         --text-color: #2c3e50;
         --card-shadow: 0 4px 15px rgba(46, 139, 87, 0.1);
         --border-radius: 12px;
+        --light-bg: #ffffff;
+        --dark-text: #1a1a1a;
     }
     
     .stApp {
         background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
         font-family: 'Poppins', sans-serif;
+        color: var(--dark-text);
     }
     
     .main-header {
@@ -200,17 +203,19 @@ def load_css():
         font-weight: 700;
         margin-bottom: 2rem;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        color: var(--primary-color); /* Fallback for browsers that don't support background-clip */
     }
     
     /* Authentication styling with better visibility */
     .auth-container {
-        background: white;
+        background: var(--light-bg);
         padding: 2.5rem;
         border-radius: var(--border-radius);
         box-shadow: 0 8px 32px rgba(46, 139, 87, 0.15);
         margin: 2rem auto;
         max-width: 450px;
         border: 2px solid #e8f5e8;
+        color: var(--dark-text);
     }
     
     .auth-header {
@@ -221,29 +226,32 @@ def load_css():
         font-size: 1.8rem;
     }
     
-    /* Better form styling */
+    /* Better form styling with improved visibility */
     .stTextInput > div > div > input {
         background-color: #f8f9fa !important;
         border: 2px solid #e9ecef !important;
         border-radius: 8px !important;
         padding: 12px 16px !important;
         font-size: 16px !important;
-        color: #495057 !important;
+        color: var(--dark-text) !important;
+        font-family: 'Poppins', sans-serif !important;
     }
     
     .stTextInput > div > div > input:focus {
         border-color: var(--primary-color) !important;
         box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1) !important;
+        background-color: #ffffff !important;
     }
     
     .stTextInput > label {
-        color: var(--text-color) !important;
+        color: var(--dark-text) !important;
         font-weight: 600 !important;
         font-size: 16px !important;
         margin-bottom: 8px !important;
+        font-family: 'Poppins', sans-serif !important;
     }
     
-    /* Button styling */
+    /* Button styling with better visibility */
     .stButton > button {
         background: linear-gradient(135deg, var(--primary-color), var(--accent-color)) !important;
         color: white !important;
@@ -255,11 +263,13 @@ def load_css():
         transition: all 0.3s ease !important;
         box-shadow: var(--card-shadow) !important;
         width: 100% !important;
+        font-family: 'Poppins', sans-serif !important;
     }
     
     .stButton > button:hover {
         transform: translateY(-2px) !important;
         box-shadow: 0 6px 20px rgba(46, 139, 87, 0.3) !important;
+        background: linear-gradient(135deg, var(--accent-color), var(--primary-color)) !important;
     }
     
     /* Alert styling for better visibility */
@@ -271,6 +281,7 @@ def load_css():
         padding: 1rem !important;
         margin: 1rem 0 !important;
         font-weight: 500 !important;
+        font-family: 'Poppins', sans-serif !important;
     }
     
     .alert-error {
@@ -281,6 +292,7 @@ def load_css():
         padding: 1rem !important;
         margin: 1rem 0 !important;
         font-weight: 500 !important;
+        font-family: 'Poppins', sans-serif !important;
     }
     
     .alert-warning {
@@ -291,6 +303,7 @@ def load_css():
         padding: 1rem !important;
         margin: 1rem 0 !important;
         font-weight: 500 !important;
+        font-family: 'Poppins', sans-serif !important;
     }
     
     .alert-info {
@@ -301,6 +314,7 @@ def load_css():
         padding: 1rem !important;
         margin: 1rem 0 !important;
         font-weight: 500 !important;
+        font-family: 'Poppins', sans-serif !important;
     }
     
     /* Disease info styling */
@@ -311,6 +325,7 @@ def load_css():
         border-left: 5px solid var(--primary-color);
         margin: 1rem 0;
         box-shadow: var(--card-shadow);
+        color: var(--dark-text);
     }
     
     .confidence-high {
@@ -320,6 +335,7 @@ def load_css():
         border-radius: var(--border-radius);
         border-left: 5px solid #28a745;
         font-weight: 600;
+        font-family: 'Poppins', sans-serif;
     }
     
     .confidence-medium {
@@ -329,6 +345,7 @@ def load_css():
         border-radius: var(--border-radius);
         border-left: 5px solid #ffc107;
         font-weight: 600;
+        font-family: 'Poppins', sans-serif;
     }
     
     .confidence-low {
@@ -338,11 +355,13 @@ def load_css():
         border-radius: var(--border-radius);
         border-left: 5px solid #dc3545;
         font-weight: 600;
+        font-family: 'Poppins', sans-serif;
     }
     
     /* Sidebar styling */
     .css-1d391kg {
         background: linear-gradient(180deg, #f8fff8, #e8f5e8) !important;
+        color: var(--dark-text) !important;
     }
     
     /* Tab styling */
@@ -352,12 +371,13 @@ def load_css():
     }
     
     .stTabs [data-baseweb="tab"] {
-        background: white !important;
+        background: var(--light-bg) !important;
         border-radius: var(--border-radius) !important;
         padding: 1rem 2rem !important;
         font-weight: 600 !important;
         border: 2px solid #e9ecef !important;
-        color: var(--text-color) !important;
+        color: var(--dark-text) !important;
+        font-family: 'Poppins', sans-serif !important;
     }
     
     .stTabs [aria-selected="true"] {
@@ -368,7 +388,7 @@ def load_css():
     
     /* Feature box styling */
     .feature-box {
-        background: white;
+        background: var(--light-bg);
         padding: 2rem;
         border-radius: var(--border-radius);
         box-shadow: var(--card-shadow);
@@ -379,6 +399,7 @@ def load_css():
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        color: var(--dark-text);
     }
     
     .feature-box:hover {
@@ -395,52 +416,44 @@ def load_css():
     }
     
     .feature-box p {
-        color: var(--text-color);
+        color: var(--dark-text);
         line-height: 1.6;
         font-size: 1rem;
     }
     
-    /* Improve overall text visibility */
-    .stMarkdown, .stMarkdown p, .stMarkdown li, .stMarkdown div {
-        color: var(--text-color) !important;
+    /* Fix empty boxes and improve layout */
+    .stContainer, .stColumn, .stRow {
+        background: transparent !important;
     }
     
-    .stSelectbox label, .stNumberInput label, .stDateInput label {
-        color: var(--text-color) !important;
-        font-weight: 600 !important;
+    /* Ensure all text is visible */
+    .stText, .stHeader, .stSubheader, .stTitle {
+        color: var(--dark-text) !important;
+        font-family: 'Poppins', sans-serif !important;
     }
     
-    /* File uploader styling */
-    .stFileUploader {
-        border: 2px dashed var(--secondary-color) !important;
-        border-radius: var(--border-radius) !important;
-        padding: 2rem !important;
-        text-align: center !important;
-        background: rgba(144, 238, 144, 0.1) !important;
+    /* Fix spinner and progress bars */
+    .stSpinner {
+        color: var(--primary-color) !important;
     }
     
-    /* Metric cards */
-    .metric-card {
-        background: white;
-        padding: 2rem;
+    /* Improve dataframes and tables */
+    .stDataFrame {
+        background: var(--light-bg) !important;
+        color: var(--dark-text) !important;
+    }
+    
+    /* Fix image display */
+    .stImage {
         border-radius: var(--border-radius);
         box-shadow: var(--card-shadow);
-        text-align: center;
-        border: 2px solid transparent;
-        transition: all 0.3s ease;
     }
     
-    .metric-number {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: var(--primary-color);
-        display: block;
-    }
-    
-    .metric-label {
-        color: var(--text-color);
-        font-weight: 500;
-        margin-top: 0.5rem;
+    /* Ensure success/error/info messages are visible */
+    .stSuccess, .stError, .stWarning, .stInfo {
+        background-color: inherit !important;
+        color: inherit !important;
+        border: none !important;
     }
     </style>
     """, unsafe_allow_html=True)
