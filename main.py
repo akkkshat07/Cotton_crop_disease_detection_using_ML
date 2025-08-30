@@ -24,6 +24,9 @@ if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 if 'user_data' not in st.session_state:
     st.session_state.user_data = None
+# Add theme state
+if 'theme_mode' not in st.session_state:
+    st.session_state.theme_mode = 'light'
 
 # Initialize database
 def init_database():
@@ -169,31 +172,71 @@ def logout():
             del st.session_state[key]
     safe_rerun()  # replaced st.rerun()
 
-# Enhanced CSS styling with better visibility and theme fixes
+# Enhanced CSS styling with theme support and fixed empty boxes
 def load_css():
-    st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    # Get current theme
+    theme = st.session_state.get('theme_mode', 'light')
     
-    :root {
+    # Define theme variables
+    if theme == 'dark':
+        theme_vars = """
+        --primary-color: #3FBF7F;
+        --secondary-color: #66D9A5;
+        --accent-color: #2E8B57;
+        --background-color: #1a1a1a;
+        --card-bg: #2d2d2d;
+        --text-color: #ffffff;
+        --secondary-text: #b8b8b8;
+        --border-color: #404040;
+        --input-bg: #404040;
+        --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        """
+    else:
+        theme_vars = """
         --primary-color: #2E8B57;
         --secondary-color: #90EE90;
         --accent-color: #228B22;
         --background-color: #f8fffe;
-        --text-color: #2c3e50;
-        --card-shadow: 0 4px 15px rgba(46, 139, 87, 0.1);
+        --card-bg: #ffffff;
+        --text-color: #1a1a1a;
+        --secondary-text: #666666;
+        --border-color: #e8f5e8;
+        --input-bg: #f8fffe;
+        --shadow: 0 4px 15px rgba(46, 139, 87, 0.1);
+        """
+    
+    st.markdown(f"""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    :root {{
+        {theme_vars}
         --border-radius: 12px;
-        --light-bg: #ffffff;
-        --dark-text: #1a1a1a;
-    }
+    }}
     
-    .stApp {
-        background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
+    /* Base app styling */
+    .stApp {{
+        background: var(--background-color);
         font-family: 'Poppins', sans-serif;
-        color: var(--dark-text);
-    }
+        color: var(--text-color);
+        min-height: 100vh;
+    }}
     
-    .main-header {
+    /* Hide empty containers and fix layout issues */
+    .element-container:empty,
+    .stColumn > div:empty,
+    .stContainer > div:empty {{
+        display: none !important;
+    }}
+    
+    /* Fix main content area */
+    .main .block-container {{
+        padding-top: 2rem;
+        max-width: 100%;
+    }}
+    
+    /* Header styling */
+    .main-header {{
         text-align: center;
         background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
         -webkit-background-clip: text;
@@ -202,25 +245,53 @@ def load_css():
         font-size: 3rem;
         font-weight: 700;
         margin-bottom: 2rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        color: var(--primary-color); /* Fallback for browsers that don't support background-clip */
-    }
+        color: var(--primary-color);
+    }}
     
-    /* Enhanced Authentication styling */
-    .auth-container {
-        background: var(--light-bg);
+    /* Theme toggle button */
+    .theme-toggle {{
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        background: var(--card-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 50px;
+        padding: 10px 20px;
+        cursor: pointer;
+        box-shadow: var(--shadow);
+        transition: all 0.3s ease;
+    }}
+    
+    .theme-toggle:hover {{
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }}
+    
+    /* Enhanced Authentication styling - no empty boxes */
+    .auth-section {{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 60vh;
+        padding: 2rem 0;
+    }}
+    
+    .auth-container {{
+        background: var(--card-bg);
         padding: 3rem 2.5rem;
         border-radius: var(--border-radius);
-        box-shadow: 0 12px 40px rgba(46, 139, 87, 0.15);
-        margin: 2rem auto;
+        box-shadow: var(--shadow);
+        margin: 0 auto;
         max-width: 480px;
-        border: 2px solid #e8f5e8;
-        color: var(--dark-text);
+        width: 100%;
+        border: 2px solid var(--border-color);
+        color: var(--text-color);
         position: relative;
         backdrop-filter: blur(10px);
-    }
+    }}
     
-    .auth-container::before {
+    .auth-container::before {{
         content: '';
         position: absolute;
         top: 0;
@@ -229,18 +300,18 @@ def load_css():
         height: 4px;
         background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
         border-radius: var(--border-radius) var(--border-radius) 0 0;
-    }
+    }}
     
-    .auth-header {
+    .auth-header {{
         text-align: center;
         margin-bottom: 2.5rem;
         color: var(--primary-color);
         font-weight: 700;
         font-size: 2rem;
         position: relative;
-    }
+    }}
     
-    .auth-header::after {
+    .auth-header::after {{
         content: '';
         position: absolute;
         bottom: -10px;
@@ -250,40 +321,40 @@ def load_css():
         height: 3px;
         background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
         border-radius: 2px;
-    }
+    }}
     
-    /* Enhanced form styling */
-    .stTextInput > div > div > input {
-        background-color: #f8fffe !important;
-        border: 2px solid #e8f5e8 !important;
+    /* Form styling */
+    .stTextInput > div > div > input {{
+        background-color: var(--input-bg) !important;
+        border: 2px solid var(--border-color) !important;
         border-radius: 10px !important;
         padding: 16px 20px !important;
         font-size: 16px !important;
-        color: var(--dark-text) !important;
+        color: var(--text-color) !important;
         font-family: 'Poppins', sans-serif !important;
         transition: all 0.3s ease !important;
         box-shadow: inset 0 2px 4px rgba(0,0,0,0.05) !important;
-    }
+    }}
     
-    .stTextInput > div > div > input:focus {
+    .stTextInput > div > div > input:focus {{
         border-color: var(--primary-color) !important;
         box-shadow: 0 0 0 4px rgba(46, 139, 87, 0.1) !important;
-        background-color: #ffffff !important;
+        background-color: var(--card-bg) !important;
         transform: translateY(-1px) !important;
-    }
+    }}
     
-    .stTextInput > label {
-        color: var(--dark-text) !important;
+    .stTextInput > label {{
+        color: var(--text-color) !important;
         font-weight: 600 !important;
         font-size: 15px !important;
         margin-bottom: 8px !important;
         font-family: 'Poppins', sans-serif !important;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-    }
+    }}
     
-    /* Enhanced button styling */
-    .stButton > button {
+    /* Button styling */
+    .stButton > button {{
         background: linear-gradient(135deg, var(--primary-color), var(--accent-color)) !important;
         color: white !important;
         border: none !important;
@@ -298,21 +369,16 @@ def load_css():
         text-transform: uppercase;
         letter-spacing: 1px;
         margin-top: 1rem !important;
-    }
+    }}
     
-    .stButton > button:hover {
+    .stButton > button:hover {{
         transform: translateY(-3px) !important;
         box-shadow: 0 8px 25px rgba(46, 139, 87, 0.4) !important;
         background: linear-gradient(135deg, var(--accent-color), var(--primary-color)) !important;
-    }
+    }}
     
-    .stButton > button:active {
-        transform: translateY(-1px) !important;
-        box-shadow: 0 4px 15px rgba(46, 139, 87, 0.3) !important;
-    }
-    
-    /* Enhanced alert styling */
-    .alert-success {
+    /* Alert styling */
+    .alert-success {{
         background: linear-gradient(135deg, #d4edda, #c3e6cb) !important;
         color: #155724 !important;
         border: 2px solid #28a745 !important;
@@ -323,9 +389,9 @@ def load_css():
         font-family: 'Poppins', sans-serif !important;
         box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2) !important;
         animation: slideIn 0.3s ease !important;
-    }
+    }}
     
-    .alert-error {
+    .alert-error {{
         background: linear-gradient(135deg, #f8d7da, #f5c6cb) !important;
         color: #721c24 !important;
         border: 2px solid #dc3545 !important;
@@ -336,9 +402,9 @@ def load_css():
         font-family: 'Poppins', sans-serif !important;
         box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2) !important;
         animation: slideIn 0.3s ease !important;
-    }
+    }}
     
-    .alert-warning {
+    .alert-warning {{
         background: linear-gradient(135deg, #fff3cd, #ffeaa7) !important;
         color: #856404 !important;
         border: 2px solid #ffc107 !important;
@@ -349,7 +415,7 @@ def load_css():
         font-family: 'Poppins', sans-serif !important;
         box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2) !important;
         animation: slideIn 0.3s ease !important;
-    }
+    }}
     
     @keyframes slideIn {
         from {
@@ -362,25 +428,7 @@ def load_css():
         }
     }
     
-    /* Form field icons */
-    .form-field {
-        position: relative;
-        margin-bottom: 1.5rem;
-    }
-    
-    .form-field::before {
-        content: '';
-        position: absolute;
-        left: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 20px;
-        height: 20px;
-        z-index: 10;
-        pointer-events: none;
-    }
-    
-    /* Tab styling enhancement */
+    /* Tab styling */
     .stTabs [data-baseweb="tab-list"] {
         gap: 12px;
         background: transparent;
@@ -389,12 +437,12 @@ def load_css():
     }
     
     .stTabs [data-baseweb="tab"] {
-        background: linear-gradient(135deg, #f8fffe, #e8f5e8) !important;
+        background: var(--card-bg) !important;
         border-radius: 25px !important;
         padding: 12px 30px !important;
         font-weight: 600 !important;
-        border: 2px solid #e8f5e8 !important;
-        color: var(--dark-text) !important;
+        border: 2px solid var(--border-color) !important;
+        color: var(--text-color) !important;
         font-family: 'Poppins', sans-serif !important;
         transition: all 0.3s ease !important;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
@@ -415,7 +463,7 @@ def load_css():
         gap: 8px;
         font-size: 12px;
         margin-top: 5px;
-        color: #666;
+        color: var(--secondary-text);
     }
     
     .validation-check.valid {
@@ -426,9 +474,130 @@ def load_css():
         color: #dc3545;
     }
     
-    /* ...existing CSS continues... */
+    /* Info section styling */
+    .info-section {
+        background: var(--card-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 15px;
+        margin: 2rem 0;
+        padding: 3rem 2rem;
+        text-align: center;
+    }
+    
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+    
+    .info-card {
+        background: var(--card-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        transition: all 0.3s ease;
+    }
+    
+    .info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .info-card h3 {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+    }
+    
+    .info-card p {
+        color: var(--text-color);
+        line-height: 1.6;
+        font-size: 1rem;
+    }
+    
+    /* Sidebar styling */
+    .css-1d391kg {
+        background: var(--card-bg) !important;
+        color: var(--text-color) !important;
+        border-right: 2px solid var(--border-color) !important;
+    }
+    
+    /* Feature box styling */
+    .feature-box {
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        margin: 1rem 0;
+        border: 2px solid var(--border-color);
+        transition: all 0.3s ease;
+        height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        color: var(--text-color);
+    }
+    
+    .feature-box:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-color);
+        box-shadow: 0 8px 25px rgba(46, 139, 87, 0.15);
+    }
+    
+    .feature-box h3 {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+    }
+    
+    .feature-box p {
+        color: var(--text-color);
+        line-height: 1.6;
+        font-size: 1rem;
+    }
+    
+    /* General text styling */
+    .stMarkdown, .stMarkdown p, .stMarkdown li, .stMarkdown div {
+        color: var(--text-color) !important;
+        font-family: 'Poppins', sans-serif !important;
+    }
+    
+    .stSelectbox label, .stNumberInput label, .stDateInput label {
+        color: var(--text-color) !important;
+        font-weight: 600 !important;
+        font-family: 'Poppins', sans-serif !important;
+    }
+    
+    /* Checkbox styling */
+    .stCheckbox > label {
+        color: var(--text-color) !important;
+        font-family: 'Poppins', sans-serif !important;
+    }
+    
+    /* Remove empty spaces */
+    .element-container:has(> .stEmpty) {
+        display: none !important;
+    }
+    
+    /* Hide streamlit branding */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
     </style>
     """, unsafe_allow_html=True)
+
+# Add theme toggle function
+def toggle_theme():
+    """Toggle between light and dark themes"""
+    if st.session_state.theme_mode == 'light':
+        st.session_state.theme_mode = 'dark'
+    else:
+        st.session_state.theme_mode = 'light'
+    safe_rerun()
 
 # Load the trained model
 @st.cache_resource
@@ -633,34 +802,40 @@ def show_password_requirements(password):
 
 # Main application logic
 if not st.session_state.authenticated:
-    # Enhanced Authentication interface
+    # Theme toggle button
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col3:
+        theme_icon = "🌙" if st.session_state.theme_mode == 'light' else "☀️"
+        theme_text = "Dark Mode" if st.session_state.theme_mode == 'light' else "Light Mode"
+        if st.button(f"{theme_icon} {theme_text}", key="theme_toggle"):
+            toggle_theme()
+    
+    # Enhanced Authentication interface with no empty boxes
     st.markdown('<h1 class="main-header">🌱 COTTON DISEASE DETECTION SYSTEM 🌱</h1>', unsafe_allow_html=True)
     
-    # Create centered columns for authentication
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # Single centered container for authentication
+    st.markdown('<div class="auth-section">', unsafe_allow_html=True)
     
-    with col2:
+    # Create a single centered column
+    _, auth_col, _ = st.columns([1, 2, 1])
+    
+    with auth_col:
         # Enhanced Authentication tabs
         tab1, tab2 = st.tabs(["🔑 Sign In", "📝 Create Account"])
         
         with tab1:
             st.markdown('<div class="auth-container">', unsafe_allow_html=True)
             st.markdown('<h2 class="auth-header">👋 Welcome Back!</h2>', unsafe_allow_html=True)
-            st.markdown('<p style="text-align: center; color: #666; margin-bottom: 2rem;">Sign in to continue to your dashboard</p>', unsafe_allow_html=True)
+            st.markdown('<p style="text-align: center; color: var(--secondary-text); margin-bottom: 2rem;">Sign in to continue to your dashboard</p>', unsafe_allow_html=True)
             
             with st.form("login_form", clear_on_submit=False):
-                # Username field with icon
-                st.markdown('<div class="form-field">', unsafe_allow_html=True)
                 login_username = st.text_input(
                     "👤 Username", 
                     placeholder="Enter your username",
                     key="login_user",
                     help="Enter the username you used during registration"
                 )
-                st.markdown('</div>', unsafe_allow_html=True)
                 
-                # Password field with icon
-                st.markdown('<div class="form-field">', unsafe_allow_html=True)
                 login_password = st.text_input(
                     "🔒 Password", 
                     type="password", 
@@ -668,9 +843,7 @@ if not st.session_state.authenticated:
                     key="login_pass",
                     help="Enter your account password"
                 )
-                st.markdown('</div>', unsafe_allow_html=True)
                 
-                # Remember me checkbox
                 remember_me = st.checkbox("🔄 Remember me", help="Stay signed in for 30 days")
                 
                 login_btn = st.form_submit_button("🚀 Sign In")
@@ -696,11 +869,10 @@ if not st.session_state.authenticated:
                     else:
                         st.markdown('<div class="alert-warning">⚠️ Please enter both username and password.</div>', unsafe_allow_html=True)
             
-            # Additional login options
             st.markdown("---")
             st.markdown(
-                '<p style="text-align: center; color: #666; font-size: 14px;">'
-                'Forgot your password? <a href="#" style="color: #2E8B57; text-decoration: none;">Reset it here</a>'
+                '<p style="text-align: center; color: var(--secondary-text); font-size: 14px;">'
+                'Forgot your password? <a href="#" style="color: var(--primary-color); text-decoration: none;">Reset it here</a>'
                 '</p>', 
                 unsafe_allow_html=True
             )
@@ -710,11 +882,9 @@ if not st.session_state.authenticated:
         with tab2:
             st.markdown('<div class="auth-container">', unsafe_allow_html=True)
             st.markdown('<h2 class="auth-header">🌟 Join Us Today!</h2>', unsafe_allow_html=True)
-            st.markdown('<p style="text-align: center; color: #666; margin-bottom: 2rem;">Create your account to start protecting your crops</p>', unsafe_allow_html=True)
+            st.markdown('<p style="text-align: center; color: var(--secondary-text); margin-bottom: 2rem;">Create your account to start protecting your crops</p>', unsafe_allow_html=True)
             
             with st.form("register_form", clear_on_submit=False):
-                # Username field
-                st.markdown('<div class="form-field">', unsafe_allow_html=True)
                 reg_username = st.text_input(
                     "👤 Username", 
                     placeholder="Choose a unique username",
@@ -722,7 +892,6 @@ if not st.session_state.authenticated:
                     help="Username must be at least 3 characters long and unique"
                 )
                 
-                # Real-time username validation
                 if reg_username:
                     if len(reg_username.strip()) < 3:
                         st.markdown('<div class="validation-check invalid">❌ Username must be at least 3 characters</div>', unsafe_allow_html=True)
@@ -731,10 +900,6 @@ if not st.session_state.authenticated:
                     else:
                         st.markdown('<div class="validation-check valid">✅ Username looks good</div>', unsafe_allow_html=True)
                 
-                st.markdown('</div>', unsafe_allow_html=True)
-                
-                # Email field
-                st.markdown('<div class="form-field">', unsafe_allow_html=True)
                 reg_email = st.text_input(
                     "📧 Email Address", 
                     placeholder="Enter your email address",
@@ -742,17 +907,12 @@ if not st.session_state.authenticated:
                     help="We'll use this for account recovery and notifications"
                 )
                 
-                # Real-time email validation
                 if reg_email:
                     if validate_email(reg_email):
                         st.markdown('<div class="validation-check valid">✅ Valid email format</div>', unsafe_allow_html=True)
                     else:
                         st.markdown('<div class="validation-check invalid">❌ Please enter a valid email address</div>', unsafe_allow_html=True)
                 
-                st.markdown('</div>', unsafe_allow_html=True)
-                
-                # Password field
-                st.markdown('<div class="form-field">', unsafe_allow_html=True)
                 reg_password = st.text_input(
                     "🔒 Password", 
                     type="password", 
@@ -761,7 +921,6 @@ if not st.session_state.authenticated:
                     help="Password should be at least 8 characters with mixed case, numbers, and symbols"
                 )
                 
-                # Password strength indicator
                 if reg_password:
                     requirements = validate_password_strength(reg_password)
                     strength_score = sum(requirements.values())
@@ -781,14 +940,9 @@ if not st.session_state.authenticated:
                     
                     st.markdown(f'<div style="color: {strength_color}; font-weight: 600; margin-top: 5px;">Password Strength: {strength_text}</div>', unsafe_allow_html=True)
                     
-                    # Show detailed requirements
                     with st.expander("📋 Password Requirements", expanded=(strength_score < 4)):
                         show_password_requirements(reg_password)
                 
-                st.markdown('</div>', unsafe_allow_html=True)
-                
-                # Confirm password field
-                st.markdown('<div class="form-field">', unsafe_allow_html=True)
                 reg_confirm_password = st.text_input(
                     "🔒 Confirm Password", 
                     type="password", 
@@ -797,16 +951,12 @@ if not st.session_state.authenticated:
                     help="Re-enter your password to confirm"
                 )
                 
-                # Password match validation
                 if reg_password and reg_confirm_password:
                     if reg_password == reg_confirm_password:
                         st.markdown('<div class="validation-check valid">✅ Passwords match</div>', unsafe_allow_html=True)
                     else:
                         st.markdown('<div class="validation-check invalid">❌ Passwords do not match</div>', unsafe_allow_html=True)
                 
-                st.markdown('</div>', unsafe_allow_html=True)
-                
-                # Terms and conditions
                 terms_accepted = st.checkbox(
                     "📋 I agree to the Terms of Service and Privacy Policy",
                     help="You must accept our terms to create an account"
@@ -855,35 +1005,36 @@ if not st.session_state.authenticated:
             
             st.markdown('</div>', unsafe_allow_html=True)
     
+    st.markdown('</div>', unsafe_allow_html=True)
+    
     # Enhanced information section
-    st.markdown("---")
     st.markdown("""
-    <div style="text-align: center; padding: 3rem 2rem; background: linear-gradient(135deg, rgba(46, 139, 87, 0.05), rgba(144, 238, 144, 0.05)); border-radius: 15px; margin: 2rem 0;">
-        <h3 style="color: #2E8B57; font-size: 2rem; margin-bottom: 1rem;">🌿 Transform Your Cotton Farming</h3>
-        <p style="font-size: 1.2rem; color: #555; line-height: 1.8; max-width: 800px; margin: 0 auto 2rem;">
+    <div class="info-section">
+        <h3 style="color: var(--primary-color); font-size: 2rem; margin-bottom: 1rem;">🌿 Transform Your Cotton Farming</h3>
+        <p style="font-size: 1.2rem; color: var(--secondary-text); line-height: 1.8; max-width: 800px; margin: 0 auto 2rem;">
             Join thousands of farmers worldwide who trust our AI-powered disease detection system. 
             Protect your crops, increase yields, and farm smarter with cutting-edge technology.
         </p>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-top: 3rem;">
-            <div style="text-align: center; padding: 1.5rem; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <div class="info-grid">
+            <div class="info-card">
                 <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
-                <div style="font-weight: 700; font-size: 1.1rem; color: #2E8B57;">98.9% Accuracy</div>
-                <div style="color: #666; margin-top: 0.5rem;">Industry-leading precision</div>
+                <div style="font-weight: 700; font-size: 1.1rem; color: var(--primary-color);">98.9% Accuracy</div>
+                <div style="color: var(--secondary-text); margin-top: 0.5rem;">Industry-leading precision</div>
             </div>
-            <div style="text-align: center; padding: 1.5rem; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <div class="info-card">
                 <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
-                <div style="font-weight: 700; font-size: 1.1rem; color: #2E8B57;">Instant Analysis</div>
-                <div style="color: #666; margin-top: 0.5rem;">Results in seconds</div>
+                <div style="font-weight: 700; font-size: 1.1rem; color: var(--primary-color);">Instant Analysis</div>
+                <div style="color: var(--secondary-text); margin-top: 0.5rem;">Results in seconds</div>
             </div>
-            <div style="text-align: center; padding: 1.5rem; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <div class="info-card">
                 <div style="font-size: 3rem; margin-bottom: 1rem;">🌱</div>
-                <div style="font-weight: 700; font-size: 1.1rem; color: #2E8B57;">9 Disease Types</div>
-                <div style="color: #666; margin-top: 0.5rem;">Comprehensive detection</div>
+                <div style="font-weight: 700; font-size: 1.1rem; color: var(--primary-color);">9 Disease Types</div>
+                <div style="color: var(--secondary-text); margin-top: 0.5rem;">Comprehensive detection</div>
             </div>
-            <div style="text-align: center; padding: 1.5rem; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <div class="info-card">
                 <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
-                <div style="font-weight: 700; font-size: 1.1rem; color: #2E8B57;">Expert Guidance</div>
-                <div style="color: #666; margin-top: 0.5rem;">Treatment recommendations</div>
+                <div style="font-weight: 700; font-size: 1.1rem; color: var(--primary-color);">Expert Guidance</div>
+                <div style="color: var(--secondary-text); margin-top: 0.5rem;">Treatment recommendations</div>
             </div>
         </div>
     </div>
@@ -891,14 +1042,21 @@ if not st.session_state.authenticated:
 
 else:
     # Main application for authenticated users
-    # Sidebar with user info and navigation
+    # Theme toggle in sidebar
     with st.sidebar:
         st.markdown(f"""
-        <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #2E8B57, #90EE90); border-radius: 10px; margin-bottom: 1rem;">
+        <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 10px; margin-bottom: 1rem;">
             <h3 style="color: white; margin: 0;">👋 Welcome!</h3>
             <p style="color: white; margin: 0; font-weight: 500;">{st.session_state.user_data['username']}</p>
         </div>
         """, unsafe_allow_html=True)
+        
+        # Theme toggle
+        st.markdown("---")
+        theme_icon = "🌙" if st.session_state.theme_mode == 'light' else "☀️"
+        theme_text = "Dark Mode" if st.session_state.theme_mode == 'light' else "Light Mode"
+        if st.button(f"{theme_icon} {theme_text}", key="sidebar_theme_toggle"):
+            toggle_theme()
         
         # Navigation
         st.markdown("### 🧭 Navigation")
@@ -908,7 +1066,6 @@ else:
             help="Navigate through different sections of the app"
         )
 
-        # Add model info
         st.markdown("---")
         st.markdown("### 🤖 Model Info")
         st.info(f"""
@@ -919,7 +1076,6 @@ else:
         **GPT-5 Preview:** {"Enabled ✅" if GPT5_PREVIEW_ENABLED else "Disabled"}  
         """)
         
-        # Logout button
         st.markdown("---")
         if st.button("🚪 Logout", key="logout_btn", help="Sign out of your account"):
             logout()
@@ -930,7 +1086,7 @@ else:
         
         # Welcome message
         st.markdown(f"""
-        <div style="text-align: center; font-size: 1.2rem; margin: 2rem 0; padding: 1.5rem; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(46, 139, 87, 0.1);">
+        <div style="text-align: center; font-size: 1.2rem; margin: 2rem 0; padding: 1.5rem; background: var(--card-bg); border-radius: 10px; box-shadow: var(--shadow);">
             Welcome back, <strong>{st.session_state.user_data['username']}</strong>! 🌿  
             Use our AI-powered system to detect cotton diseases instantly.
         </div>
