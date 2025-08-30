@@ -457,66 +457,66 @@ def load_css():
     }}
     
     /* Validation styling */
-    .validation-check {
+    .validation-check {{
         display: flex;
         align-items: center;
         gap: 8px;
         font-size: 12px;
         margin-top: 5px;
         color: var(--secondary-text);
-    }
+    }}
     
-    .validation-check.valid {
+    .validation-check.valid {{
         color: #28a745;
-    }
+    }}
     
-    .validation-check.invalid {
+    .validation-check.invalid {{
         color: #dc3545;
-    }
+    }}
     
     /* Info section styling */
-    .info-section {
+    .info-section {{
         background: var(--card-bg);
         border: 2px solid var(--border-color);
         border-radius: 15px;
         margin: 2rem 0;
         padding: 3rem 2rem;
         text-align: center;
-    }
+    }}
     
-    .info-grid {
+    .info-grid {{
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 2rem;
         margin-top: 3rem;
-    }
+    }}
     
-    .info-card {
+    .info-card {{
         background: var(--card-bg);
         border: 2px solid var(--border-color);
         border-radius: 12px;
         padding: 1.5rem;
         box-shadow: var(--shadow);
         transition: all 0.3s ease;
-    }
+    }}
     
-    .info-card:hover {
+    .info-card:hover {{
         transform: translateY(-5px);
         box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
+    }}
     
-    .info-card h3 {
+    .info-card h3 {{
         color: var(--primary-color);
         font-weight: 600;
         margin-bottom: 1rem;
         font-size: 1.3rem;
-    }
+    }}
     
-    .info-card p {
+    .info-card p {{
         color: var(--text-color);
         line-height: 1.6;
         font-size: 1rem;
-    }
+    }}
     
     /* Sidebar styling */
     .css-1d391kg {
