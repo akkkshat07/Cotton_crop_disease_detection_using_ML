@@ -429,14 +429,14 @@ def load_css():
     }}
     
     /* Tab styling */
-    .stTabs [data-baseweb="tab-list"] {
+    .stTabs [data-baseweb="tab-list"] {{
         gap: 12px;
         background: transparent;
         justify-content: center;
         margin-bottom: 2rem;
-    }
+    }}
     
-    .stTabs [data-baseweb="tab"] {
+    .stTabs [data-baseweb="tab"] {{
         background: var(--card-bg) !important;
         border-radius: 25px !important;
         padding: 12px 30px !important;
@@ -446,15 +446,15 @@ def load_css():
         font-family: 'Poppins', sans-serif !important;
         transition: all 0.3s ease !important;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
-    }
+    }}
     
-    .stTabs [aria-selected="true"] {
+    .stTabs [aria-selected="true"] {{
         background: linear-gradient(135deg, var(--primary-color), var(--accent-color)) !important;
         color: white !important;
         border-color: var(--primary-color) !important;
         transform: translateY(-2px) !important;
         box-shadow: 0 4px 15px rgba(46, 139, 87, 0.3) !important;
-    }
+    }}
     
     /* Validation styling */
     .validation-check {
