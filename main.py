@@ -591,6 +591,25 @@ init_database()
 # Load CSS
 load_css()
 
+# ---- DataFrame display compatibility helper (add after imports / before usage) ----
+def safe_dataframe(df, use_container_width=True, hide_index=True, **kwargs):
+    """
+    Wrapper around st.dataframe to stay compatible with older Streamlit versions
+    that may not support the 'hide_index' parameter.
+    """
+    try:
+        return st.dataframe(
+            df,
+            use_container_width=use_container_width,
+            hide_index=hide_index,
+            **kwargs
+        )
+    except TypeError:
+        # Fallback: remove index manually if requested
+        if hide_index:
+            df = df.reset_index(drop=True)
+        return st.dataframe(df, use_container_width=use_container_width, **kwargs)
+
 # Main application logic
 if not st.session_state.authenticated:
     # Authentication interface
@@ -1200,7 +1219,8 @@ else:
             })
         
         disease_df = pd.DataFrame(disease_data)
-        st.dataframe(disease_df, use_container_width=True, hide_index=True)
+        # REPLACED st.dataframe(...) WITH safe_dataframe FOR VERSION COMPATIBILITY
+        safe_dataframe(disease_df, use_container_width=True, hide_index=True)
         
         # Usage guidelines
         st.markdown("---")
