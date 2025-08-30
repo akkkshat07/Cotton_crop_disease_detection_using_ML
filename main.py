@@ -172,37 +172,43 @@ def logout():
             del st.session_state[key]
     safe_rerun()  # replaced st.rerun()
 
-# Enhanced CSS styling with theme support and fixed empty boxes
+# Enhanced CSS styling with optimized theme support and improved backgrounds
 def load_css():
     # Get current theme
     theme = st.session_state.get('theme_mode', 'light')
     
-    # Define theme variables
+    # Define optimized theme variables with gradients and better colors
     if theme == 'dark':
         theme_vars = """
-        --primary-color: #3FBF7F;
-        --secondary-color: #66D9A5;
-        --accent-color: #2E8B57;
-        --background-color: #1a1a1a;
-        --card-bg: #2d2d2d;
+        --primary-color: #4CAF50;
+        --secondary-color: #81C784;
+        --accent-color: #388E3C;
+        --background-color: linear-gradient(135deg, #121212 0%, #1e1e1e 100%);
+        --card-bg: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
         --text-color: #ffffff;
-        --secondary-text: #b8b8b8;
-        --border-color: #404040;
-        --input-bg: #404040;
-        --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        --secondary-text: #b0b0b0;
+        --border-color: #555555;
+        --input-bg: linear-gradient(135deg, #404040 0%, #4a4a4a 100%);
+        --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        --hover-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        --gradient-primary: linear-gradient(135deg, #4CAF50, #388E3C);
+        --gradient-secondary: linear-gradient(135deg, #81C784, #4CAF50);
         """
     else:
         theme_vars = """
-        --primary-color: #2E8B57;
-        --secondary-color: #90EE90;
-        --accent-color: #228B22;
-        --background-color: #f8fffe;
-        --card-bg: #ffffff;
-        --text-color: #1a1a1a;
-        --secondary-text: #666666;
-        --border-color: #e8f5e8;
-        --input-bg: #f8fffe;
-        --shadow: 0 4px 15px rgba(46, 139, 87, 0.1);
+        --primary-color: #2E7D32;
+        --secondary-color: #66BB6A;
+        --accent-color: #1B5E20;
+        --background-color: linear-gradient(135deg, #f0f8f0 0%, #e8f5e8 100%);
+        --card-bg: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+        --text-color: #2c3e50;
+        --secondary-text: #7f8c8d;
+        --border-color: #e0e0e0;
+        --input-bg: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+        --shadow: 0 4px 20px rgba(46, 125, 50, 0.1);
+        --hover-shadow: 0 8px 30px rgba(46, 125, 50, 0.15);
+        --gradient-primary: linear-gradient(135deg, #2E7D32, #1B5E20);
+        --gradient-secondary: linear-gradient(135deg, #66BB6A, #2E7D32);
         """
     
     st.markdown(f"""
@@ -211,15 +217,18 @@ def load_css():
     
     :root {{
         {theme_vars}
-        --border-radius: 12px;
+        --border-radius: 15px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }}
     
-    /* Base app styling */
+    /* Optimized base app styling with enhanced background */
     .stApp {{
         background: var(--background-color);
+        background-attachment: fixed;
         font-family: 'Poppins', sans-serif;
         color: var(--text-color);
         min-height: 100vh;
+        transition: var(--transition);
     }}
     
     /* Hide empty containers and fix layout issues */
@@ -229,26 +238,28 @@ def load_css():
         display: none !important;
     }}
     
-    /* Fix main content area */
+    /* Fix main content area with better spacing */
     .main .block-container {{
         padding-top: 2rem;
         max-width: 100%;
+        transition: var(--transition);
     }}
     
-    /* Header styling */
+    /* Enhanced header styling with gradient text */
     .main-header {{
         text-align: center;
-        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        background: var(--gradient-primary);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        font-size: 3rem;
-        font-weight: 700;
+        font-size: 3.5rem;
+        font-weight: 800;
         margin-bottom: 2rem;
-        color: var(--primary-color);
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        transition: var(--transition);
     }}
     
-    /* Theme toggle button */
+    /* Improved theme toggle button */
     .theme-toggle {{
         position: fixed;
         top: 20px;
@@ -257,38 +268,47 @@ def load_css():
         background: var(--card-bg);
         border: 2px solid var(--border-color);
         border-radius: 50px;
-        padding: 10px 20px;
+        padding: 12px 24px;
         cursor: pointer;
         box-shadow: var(--shadow);
-        transition: all 0.3s ease;
+        transition: var(--transition);
+        backdrop-filter: blur(10px);
     }}
     
     .theme-toggle:hover {{
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: var(--hover-shadow);
+        border-color: var(--primary-color);
     }}
     
-    /* Enhanced Authentication styling - no empty boxes */
+    /* Enhanced Authentication styling with improved backgrounds */
     .auth-section {{
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 60vh;
+        min-height: 70vh;
         padding: 2rem 0;
+        transition: var(--transition);
     }}
     
     .auth-container {{
         background: var(--card-bg);
-        padding: 3rem 2.5rem;
+        padding: 3.5rem 3rem;
         border-radius: var(--border-radius);
         box-shadow: var(--shadow);
         margin: 0 auto;
-        max-width: 480px;
+        max-width: 520px;
         width: 100%;
         border: 2px solid var(--border-color);
         color: var(--text-color);
         position: relative;
-        backdrop-filter: blur(10px);
+        backdrop-filter: blur(15px);
+        transition: var(--transition);
+    }}
+    
+    .auth-container:hover {{
+        box-shadow: var(--hover-shadow);
+        transform: translateY(-2px);
     }}
     
     .auth-container::before {{
@@ -297,8 +317,8 @@ def load_css():
         top: 0;
         left: 0;
         right: 0;
-        height: 4px;
-        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        height: 5px;
+        background: var(--gradient-primary);
         border-radius: var(--border-radius) var(--border-radius) 0 0;
     }}
     
@@ -307,120 +327,142 @@ def load_css():
         margin-bottom: 2.5rem;
         color: var(--primary-color);
         font-weight: 700;
-        font-size: 2rem;
+        font-size: 2.2rem;
         position: relative;
+        transition: var(--transition);
     }}
     
     .auth-header::after {{
         content: '';
         position: absolute;
-        bottom: -10px;
+        bottom: -12px;
         left: 50%;
         transform: translateX(-50%);
-        width: 50px;
-        height: 3px;
-        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        width: 60px;
+        height: 4px;
+        background: var(--gradient-secondary);
         border-radius: 2px;
     }}
     
-    /* Form styling */
+    /* Enhanced form styling with better backgrounds */
     .stTextInput > div > div > input {{
-        background-color: var(--input-bg) !important;
+        background: var(--input-bg) !important;
         border: 2px solid var(--border-color) !important;
-        border-radius: 10px !important;
-        padding: 16px 20px !important;
+        border-radius: 12px !important;
+        padding: 18px 22px !important;
         font-size: 16px !important;
         color: var(--text-color) !important;
         font-family: 'Poppins', sans-serif !important;
-        transition: all 0.3s ease !important;
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05) !important;
+        transition: var(--transition) !important;
+        box-shadow: inset 0 2px 8px rgba(0,0,0,0.05) !important;
     }}
     
     .stTextInput > div > div > input:focus {{
         border-color: var(--primary-color) !important;
-        box-shadow: 0 0 0 4px rgba(46, 139, 87, 0.1) !important;
-        background-color: var(--card-bg) !important;
-        transform: translateY(-1px) !important;
+        box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.2) !important;
+        background: var(--card-bg) !important;
+        transform: translateY(-2px) !important;
     }}
     
     .stTextInput > label {{
         color: var(--text-color) !important;
         font-weight: 600 !important;
         font-size: 15px !important;
-        margin-bottom: 8px !important;
+        margin-bottom: 10px !important;
         font-family: 'Poppins', sans-serif !important;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.8px;
+        transition: var(--transition) !important;
     }}
     
-    /* Button styling */
+    /* Improved button styling with gradients */
     .stButton > button {{
-        background: linear-gradient(135deg, var(--primary-color), var(--accent-color)) !important;
+        background: var(--gradient-primary) !important;
         color: white !important;
         border: none !important;
-        border-radius: 10px !important;
-        padding: 16px 2rem !important;
+        border-radius: 12px !important;
+        padding: 18px 2.5rem !important;
         font-weight: 600 !important;
         font-size: 16px !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 4px 15px rgba(46, 139, 87, 0.3) !important;
+        transition: var(--transition) !important;
+        box-shadow: var(--shadow) !important;
         width: 100% !important;
         font-family: 'Poppins', sans-serif !important;
         text-transform: uppercase;
         letter-spacing: 1px;
-        margin-top: 1rem !important;
+        margin-top: 1.5rem !important;
+        position: relative;
+        overflow: hidden;
+    }}
+    
+    .stButton > button::before {{
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
     }}
     
     .stButton > button:hover {{
-        transform: translateY(-3px) !important;
-        box-shadow: 0 8px 25px rgba(46, 139, 87, 0.4) !important;
-        background: linear-gradient(135deg, var(--accent-color), var(--primary-color)) !important;
+        transform: translateY(-3px) scale(1.02) !important;
+        box-shadow: var(--hover-shadow) !important;
+        background: var(--gradient-secondary) !important;
     }}
     
-    /* Alert styling */
+    .stButton > button:hover::before {{
+        left: 100%;
+    }}
+    
+    /* Enhanced alert styling */
     .alert-success {{
         background: linear-gradient(135deg, #d4edda, #c3e6cb) !important;
         color: #155724 !important;
         border: 2px solid #28a745 !important;
-        border-radius: 10px !important;
-        padding: 1.2rem !important;
-        margin: 1.5rem 0 !important;
+        border-radius: var(--border-radius) !important;
+        padding: 1.5rem !important;
+        margin: 2rem 0 !important;
         font-weight: 500 !important;
         font-family: 'Poppins', sans-serif !important;
-        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2) !important;
-        animation: slideIn 0.3s ease !important;
+        box-shadow: var(--shadow) !important;
+        animation: slideIn 0.4s ease !important;
+        backdrop-filter: blur(10px);
     }}
     
     .alert-error {{
         background: linear-gradient(135deg, #f8d7da, #f5c6cb) !important;
         color: #721c24 !important;
         border: 2px solid #dc3545 !important;
-        border-radius: 10px !important;
-        padding: 1.2rem !important;
-        margin: 1.5rem 0 !important;
+        border-radius: var(--border-radius) !important;
+        padding: 1.5rem !important;
+        margin: 2rem 0 !important;
         font-weight: 500 !important;
         font-family: 'Poppins', sans-serif !important;
-        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2) !important;
-        animation: slideIn 0.3s ease !important;
+        box-shadow: var(--shadow) !important;
+        animation: slideIn 0.4s ease !important;
+        backdrop-filter: blur(10px);
     }}
     
     .alert-warning {{
         background: linear-gradient(135deg, #fff3cd, #ffeaa7) !important;
         color: #856404 !important;
         border: 2px solid #ffc107 !important;
-        border-radius: 10px !important;
-        padding: 1.2rem !important;
-        margin: 1.5rem 0 !important;
+        border-radius: var(--border-radius) !important;
+        padding: 1.5rem !important;
+        margin: 2rem 0 !important;
         font-weight: 500 !important;
         font-family: 'Poppins', sans-serif !important;
-        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2) !important;
-        animation: slideIn 0.3s ease !important;
+        box-shadow: var(--shadow) !important;
+        animation: slideIn 0.4s ease !important;
+        backdrop-filter: blur(10px);
     }}
     
     @keyframes slideIn {{
         from {{
             opacity: 0;
-            transform: translateY(-10px);
+            transform: translateY(-15px);
         }}
         to {{
             opacity: 1;
@@ -428,165 +470,185 @@ def load_css():
         }}
     }}
     
-    /* Tab styling */
+    /* Enhanced tab styling */
     .stTabs [data-baseweb="tab-list"] {{
-        gap: 12px;
+        gap: 15px;
         background: transparent;
         justify-content: center;
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
+        transition: var(--transition);
     }}
     
     .stTabs [data-baseweb="tab"] {{
         background: var(--card-bg) !important;
-        border-radius: 25px !important;
-        padding: 12px 30px !important;
+        border-radius: 30px !important;
+        padding: 14px 35px !important;
         font-weight: 600 !important;
         border: 2px solid var(--border-color) !important;
         color: var(--text-color) !important;
         font-family: 'Poppins', sans-serif !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+        transition: var(--transition) !important;
+        box-shadow: var(--shadow) !important;
+        backdrop-filter: blur(10px);
     }}
     
     .stTabs [aria-selected="true"] {{
-        background: linear-gradient(135deg, var(--primary-color), var(--accent-color)) !important;
+        background: var(--gradient-primary) !important;
         color: white !important;
         border-color: var(--primary-color) !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 4px 15px rgba(46, 139, 87, 0.3) !important;
+        transform: translateY(-3px) scale(1.05) !important;
+        box-shadow: var(--hover-shadow) !important;
     }}
     
-    /* Validation styling */
+    /* Improved validation styling */
     .validation-check {{
         display: flex;
         align-items: center;
-        gap: 8px;
-        font-size: 12px;
-        margin-top: 5px;
+        gap: 10px;
+        font-size: 13px;
+        margin-top: 6px;
         color: var(--secondary-text);
+        transition: var(--transition);
     }}
     
     .validation-check.valid {{
         color: #28a745;
+        font-weight: 600;
     }}
     
     .validation-check.invalid {{
         color: #dc3545;
+        font-weight: 600;
     }}
     
-    /* Info section styling */
+    /* Enhanced info section styling */
     .info-section {{
         background: var(--card-bg);
         border: 2px solid var(--border-color);
-        border-radius: 15px;
-        margin: 2rem 0;
-        padding: 3rem 2rem;
+        border-radius: var(--border-radius);
+        margin: 3rem 0;
+        padding: 4rem 3rem;
         text-align: center;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(15px);
+        transition: var(--transition);
     }}
     
     .info-grid {{
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 2rem;
-        margin-top: 3rem;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 2.5rem;
+        margin-top: 4rem;
     }}
     
     .info-card {{
         background: var(--card-bg);
         border: 2px solid var(--border-color);
-        border-radius: 12px;
-        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        padding: 2rem;
         box-shadow: var(--shadow);
-        transition: all 0.3s ease;
+        transition: var(--transition);
+        backdrop-filter: blur(10px);
     }}
     
     .info-card:hover {{
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: var(--hover-shadow);
+        border-color: var(--primary-color);
     }}
     
     .info-card h3 {{
         color: var(--primary-color);
-        font-weight: 600;
-        margin-bottom: 1rem;
-        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        font-size: 1.4rem;
+        transition: var(--transition);
     }}
     
     .info-card p {{
         color: var(--text-color);
-        line-height: 1.6;
+        line-height: 1.7;
         font-size: 1rem;
+        transition: var(--transition);
     }}
     
-    /* Sidebar styling */
-    .css-1d391kg {
+    /* Enhanced sidebar styling */
+    .css-1d391kg {{
         background: var(--card-bg) !important;
         color: var(--text-color) !important;
         border-right: 2px solid var(--border-color) !important;
-    }
+        backdrop-filter: blur(15px);
+        transition: var(--transition);
+    }}
     
-    /* Feature box styling */
-    .feature-box {
+    /* Improved feature box styling */
+    .feature-box {{
         background: var(--card-bg);
-        padding: 2rem;
+        padding: 2.5rem;
         border-radius: var(--border-radius);
         box-shadow: var(--shadow);
-        margin: 1rem 0;
+        margin: 1.5rem 0;
         border: 2px solid var(--border-color);
-        transition: all 0.3s ease;
-        height: 200px;
+        transition: var(--transition);
+        height: 220px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         color: var(--text-color);
-    }
+        backdrop-filter: blur(10px);
+    }}
     
-    .feature-box:hover {
-        transform: translateY(-5px);
+    .feature-box:hover {{
+        transform: translateY(-8px) scale(1.02);
         border-color: var(--primary-color);
-        box-shadow: 0 8px 25px rgba(46, 139, 87, 0.15);
-    }
+        box-shadow: var(--hover-shadow);
+    }}
     
-    .feature-box h3 {
+    .feature-box h3 {{
         color: var(--primary-color);
-        font-weight: 600;
-        margin-bottom: 1rem;
-        font-size: 1.3rem;
-    }
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        font-size: 1.4rem;
+        transition: var(--transition);
+    }}
     
-    .feature-box p {
+    .feature-box p {{
         color: var(--text-color);
-        line-height: 1.6;
+        line-height: 1.7;
         font-size: 1rem;
-    }
+        transition: var(--transition);
+    }}
     
-    /* General text styling */
-    .stMarkdown, .stMarkdown p, .stMarkdown li, .stMarkdown div {
+    /* Enhanced general text styling */
+    .stMarkdown, .stMarkdown p, .stMarkdown li, .stMarkdown div {{
         color: var(--text-color) !important;
         font-family: 'Poppins', sans-serif !important;
-    }
+        transition: var(--transition) !important;
+    }}
     
-    .stSelectbox label, .stNumberInput label, .stDateInput label {
+    .stSelectbox label, .stNumberInput label, .stDateInput label {{
         color: var(--text-color) !important;
         font-weight: 600 !important;
         font-family: 'Poppins', sans-serif !important;
-    }
+        transition: var(--transition) !important;
+    }}
     
-    /* Checkbox styling */
-    .stCheckbox > label {
+    /* Improved checkbox styling */
+    .stCheckbox > label {{
         color: var(--text-color) !important;
         font-family: 'Poppins', sans-serif !important;
-    }
+        transition: var(--transition) !important;
+    }}
     
-    /* Remove empty spaces */
-    .element-container:has(> .stEmpty) {
+    /* Hide empty spaces */
+    .element-container:has(> .stEmpty) {{
         display: none !important;
-    }
+    }}
     
     /* Hide streamlit branding */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+    #MainMenu {{visibility: hidden;}}
+    footer {{visibility: hidden;}}
+    header {{visibility: hidden;}}
     </style>
     """, unsafe_allow_html=True)
 
