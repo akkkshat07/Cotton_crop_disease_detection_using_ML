@@ -417,16 +417,16 @@ def load_css():
         animation: slideIn 0.3s ease !important;
     }}
     
-    @keyframes slideIn {
-        from {
+    @keyframes slideIn {{
+        from {{
             opacity: 0;
             transform: translateY(-10px);
-        }
-        to {
+        }}
+        to {{
             opacity: 1;
             transform: translateY(0);
-        }
-    }
+        }}
+    }}
     
     /* Tab styling */
     .stTabs [data-baseweb="tab-list"] {
