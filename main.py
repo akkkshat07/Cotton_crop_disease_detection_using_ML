@@ -19,38 +19,49 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Initialize session state
+if 'authenticated' not in st.session_state:
+    st.session_state.authenticated = False
+if 'user_data' not in st.session_state:
+    st.session_state.user_data = None
+
 # Initialize database
 def init_database():
     """Initialize SQLite database for user management and predictions"""
-    conn = sqlite3.connect('cotton_disease_app.db')
-    cursor = conn.cursor()
-    
-    # Create users table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    
-    # Create predictions table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS predictions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
-            disease TEXT NOT NULL,
-            confidence REAL NOT NULL,
-            image_name TEXT,
-            prediction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users (id)
-        )
-    ''')
-    
-    conn.commit()
-    conn.close()
+    try:
+        conn = sqlite3.connect('cotton_disease_app.db', timeout=20.0)
+        cursor = conn.cursor()
+        
+        # Create users table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        # Create predictions table
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS predictions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                disease TEXT NOT NULL,
+                confidence REAL NOT NULL,
+                image_name TEXT,
+                prediction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        ''')
+        
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        st.error(f"Database initialization error: {str(e)}")
+        return False
 
 # User authentication functions
 def hash_password(password):
@@ -60,7 +71,7 @@ def hash_password(password):
 def register_user(username, email, password):
     """Register a new user"""
     try:
-        conn = sqlite3.connect('cotton_disease_app.db')
+        conn = sqlite3.connect('cotton_disease_app.db', timeout=20.0)
         cursor = conn.cursor()
         
         password_hash = hash_password(password)
@@ -72,15 +83,20 @@ def register_user(username, email, password):
         conn.commit()
         conn.close()
         return True, "Registration successful!"
-    except sqlite3.IntegrityError:
-        return False, "Username or email already exists!"
+    except sqlite3.IntegrityError as e:
+        if "username" in str(e):
+            return False, "Username already exists!"
+        elif "email" in str(e):
+            return False, "Email already exists!"
+        else:
+            return False, "Username or email already exists!"
     except Exception as e:
         return False, f"Registration failed: {str(e)}"
 
 def login_user(username, password):
     """Authenticate a user"""
     try:
-        conn = sqlite3.connect('cotton_disease_app.db')
+        conn = sqlite3.connect('cotton_disease_app.db', timeout=20.0)
         cursor = conn.cursor()
         
         password_hash = hash_password(password)
@@ -102,7 +118,7 @@ def login_user(username, password):
 def save_user_prediction(user_id, disease, confidence, image_name=None):
     """Save user prediction to database"""
     try:
-        conn = sqlite3.connect('cotton_disease_app.db')
+        conn = sqlite3.connect('cotton_disease_app.db', timeout=20.0)
         cursor = conn.cursor()
         
         cursor.execute(
@@ -120,7 +136,7 @@ def save_user_prediction(user_id, disease, confidence, image_name=None):
 def get_user_predictions(user_id):
     """Get all predictions for a specific user"""
     try:
-        conn = sqlite3.connect('cotton_disease_app.db')
+        conn = sqlite3.connect('cotton_disease_app.db', timeout=20.0)
         cursor = conn.cursor()
         
         cursor.execute(
@@ -146,13 +162,14 @@ def get_user_predictions(user_id):
 
 def logout():
     """Logout the current user"""
+    st.session_state.authenticated = False
+    st.session_state.user_data = None
     for key in list(st.session_state.keys()):
         if key.startswith('user_'):
             del st.session_state[key]
-    st.session_state.authenticated = False
     st.rerun()
 
-# Enhanced CSS styling
+# Enhanced CSS styling with better visibility
 def load_css():
     st.markdown("""
     <style>
@@ -185,39 +202,108 @@ def load_css():
         text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
     
-    .feature-box {
+    /* Authentication styling with better visibility */
+    .auth-container {
         background: white;
-        padding: 2rem;
+        padding: 2.5rem;
         border-radius: var(--border-radius);
-        box-shadow: var(--card-shadow);
-        margin: 1rem 0;
-        border: 2px solid transparent;
-        transition: all 0.3s ease;
-        height: 200px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
+        box-shadow: 0 8px 32px rgba(46, 139, 87, 0.15);
+        margin: 2rem auto;
+        max-width: 450px;
+        border: 2px solid #e8f5e8;
     }
     
-    .feature-box:hover {
-        transform: translateY(-5px);
-        border-color: var(--secondary-color);
-        box-shadow: 0 8px 25px rgba(46, 139, 87, 0.15);
-    }
-    
-    .feature-box h3 {
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
         color: var(--primary-color);
         font-weight: 600;
-        margin-bottom: 1rem;
-        font-size: 1.3rem;
+        font-size: 1.8rem;
     }
     
-    .feature-box p {
-        color: var(--text-color);
-        line-height: 1.6;
-        font-size: 1rem;
+    /* Better form styling */
+    .stTextInput > div > div > input {
+        background-color: #f8f9fa !important;
+        border: 2px solid #e9ecef !important;
+        border-radius: 8px !important;
+        padding: 12px 16px !important;
+        font-size: 16px !important;
+        color: #495057 !important;
     }
     
+    .stTextInput > div > div > input:focus {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1) !important;
+    }
+    
+    .stTextInput > label {
+        color: var(--text-color) !important;
+        font-weight: 600 !important;
+        font-size: 16px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    /* Button styling */
+    .stButton > button {
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color)) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: var(--border-radius) !important;
+        padding: 0.75rem 2rem !important;
+        font-weight: 600 !important;
+        font-size: 16px !important;
+        transition: all 0.3s ease !important;
+        box-shadow: var(--card-shadow) !important;
+        width: 100% !important;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(46, 139, 87, 0.3) !important;
+    }
+    
+    /* Alert styling for better visibility */
+    .alert-success {
+        background-color: #d4edda !important;
+        color: #155724 !important;
+        border: 2px solid #c3e6cb !important;
+        border-radius: 8px !important;
+        padding: 1rem !important;
+        margin: 1rem 0 !important;
+        font-weight: 500 !important;
+    }
+    
+    .alert-error {
+        background-color: #f8d7da !important;
+        color: #721c24 !important;
+        border: 2px solid #f5c6cb !important;
+        border-radius: 8px !important;
+        padding: 1rem !important;
+        margin: 1rem 0 !important;
+        font-weight: 500 !important;
+    }
+    
+    .alert-warning {
+        background-color: #fff3cd !important;
+        color: #856404 !important;
+        border: 2px solid #ffeaa7 !important;
+        border-radius: 8px !important;
+        padding: 1rem !important;
+        margin: 1rem 0 !important;
+        font-weight: 500 !important;
+    }
+    
+    .alert-info {
+        background-color: #d1ecf1 !important;
+        color: #0c5460 !important;
+        border: 2px solid #bee5eb !important;
+        border-radius: 8px !important;
+        padding: 1rem !important;
+        margin: 1rem 0 !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Disease info styling */
     .disease-info {
         background: linear-gradient(135deg, #fff 0%, #f8fff8 100%);
         padding: 2rem;
@@ -254,6 +340,86 @@ def load_css():
         font-weight: 600;
     }
     
+    /* Sidebar styling */
+    .css-1d391kg {
+        background: linear-gradient(180deg, #f8fff8, #e8f5e8) !important;
+    }
+    
+    /* Tab styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background: transparent;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        background: white !important;
+        border-radius: var(--border-radius) !important;
+        padding: 1rem 2rem !important;
+        font-weight: 600 !important;
+        border: 2px solid #e9ecef !important;
+        color: var(--text-color) !important;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: var(--primary-color) !important;
+        color: white !important;
+        border-color: var(--primary-color) !important;
+    }
+    
+    /* Feature box styling */
+    .feature-box {
+        background: white;
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        margin: 1rem 0;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .feature-box:hover {
+        transform: translateY(-5px);
+        border-color: var(--secondary-color);
+        box-shadow: 0 8px 25px rgba(46, 139, 87, 0.15);
+    }
+    
+    .feature-box h3 {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+    }
+    
+    .feature-box p {
+        color: var(--text-color);
+        line-height: 1.6;
+        font-size: 1rem;
+    }
+    
+    /* Improve overall text visibility */
+    .stMarkdown, .stMarkdown p, .stMarkdown li, .stMarkdown div {
+        color: var(--text-color) !important;
+    }
+    
+    .stSelectbox label, .stNumberInput label, .stDateInput label {
+        color: var(--text-color) !important;
+        font-weight: 600 !important;
+    }
+    
+    /* File uploader styling */
+    .stFileUploader {
+        border: 2px dashed var(--secondary-color) !important;
+        border-radius: var(--border-radius) !important;
+        padding: 2rem !important;
+        text-align: center !important;
+        background: rgba(144, 238, 144, 0.1) !important;
+    }
+    
+    /* Metric cards */
     .metric-card {
         background: white;
         padding: 2rem;
@@ -262,11 +428,6 @@ def load_css():
         text-align: center;
         border: 2px solid transparent;
         transition: all 0.3s ease;
-    }
-    
-    .metric-card:hover {
-        border-color: var(--secondary-color);
-        transform: scale(1.02);
     }
     
     .metric-number {
@@ -280,142 +441,6 @@ def load_css():
         color: var(--text-color);
         font-weight: 500;
         margin-top: 0.5rem;
-    }
-    
-    /* Authentication styling */
-    .auth-container {
-        background: white;
-        padding: 2rem;
-        border-radius: var(--border-radius);
-        box-shadow: var(--card-shadow);
-        margin: 2rem auto;
-        max-width: 400px;
-        border: 1px solid #e0e0e0;
-    }
-    
-    .auth-header {
-        text-align: center;
-        margin-bottom: 2rem;
-        color: var(--primary-color);
-        font-weight: 600;
-    }
-    
-    /* Sidebar styling */
-    .css-1d391kg {
-        background-color: #f8f9fa;
-    }
-    
-    .sidebar .sidebar-content {
-        background: linear-gradient(180deg, var(--primary-color), var(--accent-color));
-        color: white;
-    }
-    
-    /* Button styling */
-    .stButton > button {
-        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-        color: white;
-        border: none;
-        border-radius: var(--border-radius);
-        padding: 0.7rem 2rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: var(--card-shadow);
-    }
-    
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(46, 139, 87, 0.3);
-    }
-    
-    /* File uploader styling */
-    .stFileUploader {
-        border: 2px dashed var(--secondary-color);
-        border-radius: var(--border-radius);
-        padding: 2rem;
-        text-align: center;
-        background: rgba(144, 238, 144, 0.1);
-        transition: all 0.3s ease;
-    }
-    
-    .stFileUploader:hover {
-        border-color: var(--primary-color);
-        background: rgba(144, 238, 144, 0.2);
-    }
-    
-    /* Tab styling */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 2px;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        background: white;
-        border-radius: var(--border-radius);
-        padding: 1rem 2rem;
-        font-weight: 600;
-        border: 2px solid transparent;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background: var(--primary-color);
-        color: white;
-    }
-    
-    /* Progress bar */
-    .stProgress .st-bo {
-        background-color: var(--secondary-color);
-    }
-    
-    /* Alerts and info boxes */
-    .stAlert {
-        border-radius: var(--border-radius);
-        border: none;
-        box-shadow: var(--card-shadow);
-    }
-    
-    /* Make sure text is readable */
-    .stMarkdown p, .stMarkdown li {
-        color: var(--text-color);
-        line-height: 1.6;
-    }
-    
-    /* Ensure good contrast for all text elements */
-    .stSelectbox label, .stTextInput label, .stTextArea label {
-        color: var(--text-color) !important;
-        font-weight: 600;
-    }
-    
-    .stSelectbox div[data-baseweb="select"] {
-        border-color: var(--primary-color);
-    }
-    
-    .stTextInput input, .stTextArea textarea {
-        border-color: var(--primary-color);
-        border-radius: var(--border-radius);
-    }
-    
-    /* Improve visibility of success/error messages */
-    .stSuccess {
-        background-color: #d4edda !important;
-        color: #155724 !important;
-        border: 1px solid #c3e6cb !important;
-    }
-    
-    .stError {
-        background-color: #f8d7da !important;
-        color: #721c24 !important;
-        border: 1px solid #f5c6cb !important;
-    }
-    
-    .stWarning {
-        background-color: #fff3cd !important;
-        color: #856404 !important;
-        border: 1px solid #ffeaa7 !important;
-    }
-    
-    .stInfo {
-        background-color: #d1ecf1 !important;
-        color: #0c5460 !important;
-        border: 1px solid #bee5eb !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -507,14 +532,10 @@ class_names = [
 def preprocess_image(image):
     """Preprocess uploaded image for model prediction"""
     try:
-        # Resize image to match model input size
         image = image.resize((128, 128))
-        # Convert to RGB if needed
         if image.mode != 'RGB':
             image = image.convert('RGB')
-        # Convert to numpy array and normalize
         image_array = np.array(image) / 255.0
-        # Add batch dimension
         image_array = np.expand_dims(image_array, axis=0)
         return image_array
     except Exception as e:
@@ -532,25 +553,6 @@ def predict_disease(model, image_array):
     except Exception as e:
         st.error(f"Error making prediction: {e}")
         return None, None, None
-
-def load_prediction_history():
-    """Load prediction history from JSON file (for demo purposes)"""
-    try:
-        if os.path.exists('prediction_history.json'):
-            with open('prediction_history.json', 'r') as f:
-                return json.load(f)
-        return []
-    except Exception as e:
-        st.error(f"Error loading prediction history: {e}")
-        return []
-
-def save_prediction_history(history):
-    """Save prediction history to JSON file (for demo purposes)"""
-    try:
-        with open('prediction_history.json', 'w') as f:
-            json.dump(history, f, indent=2)
-    except Exception as e:
-        st.error(f"Error saving prediction history: {e}")
 
 def get_disease_category(disease):
     """Get disease category for the disease info table"""
@@ -573,86 +575,92 @@ init_database()
 # Load CSS
 load_css()
 
-# Authentication check
-if 'authenticated' not in st.session_state:
-    st.session_state.authenticated = False
-
+# Main application logic
 if not st.session_state.authenticated:
     # Authentication interface
     st.markdown('<h1 class="main-header">🌱 COTTON DISEASE DETECTION SYSTEM 🌱</h1>', unsafe_allow_html=True)
     
-    # Authentication tabs
-    auth_tab1, auth_tab2 = st.tabs(["🔑 Login", "📝 Register"])
+    # Create centered columns for authentication
+    col1, col2, col3 = st.columns([1, 2, 1])
     
-    with auth_tab1:
-        st.markdown('<div class="auth-container">', unsafe_allow_html=True)
-        st.markdown('<h2 class="auth-header">Welcome Back!</h2>', unsafe_allow_html=True)
+    with col2:
+        # Authentication tabs
+        tab1, tab2 = st.tabs(["🔑 Login", "📝 Register"])
         
-        with st.form("login_form"):
-            login_username = st.text_input("Username", placeholder="Enter your username")
-            login_password = st.text_input("Password", type="password", placeholder="Enter your password")
-            login_btn = st.form_submit_button("🔑 Login", use_container_width=True)
+        with tab1:
+            st.markdown('<div class="auth-container">', unsafe_allow_html=True)
+            st.markdown('<h2 class="auth-header">Welcome Back!</h2>', unsafe_allow_html=True)
             
-            if login_btn:
-                if login_username and login_password:
-                    success, result = login_user(login_username, login_password)
-                    if success:
-                        st.session_state.authenticated = True
-                        st.session_state.user_data = result
-                        st.success("Login successful! Welcome back!")
-                        st.rerun()
+            with st.form("login_form", clear_on_submit=False):
+                login_username = st.text_input("Username", placeholder="Enter your username", key="login_user")
+                login_password = st.text_input("Password", type="password", placeholder="Enter your password", key="login_pass")
+                login_btn = st.form_submit_button("🔑 Login")
+                
+                if login_btn:
+                    if login_username and login_password:
+                        with st.spinner("Logging in..."):
+                            success, result = login_user(login_username, login_password)
+                            if success:
+                                st.session_state.authenticated = True
+                                st.session_state.user_data = result
+                                st.markdown('<div class="alert-success">✅ Login successful! Welcome back!</div>', unsafe_allow_html=True)
+                                st.rerun()
+                            else:
+                                st.markdown(f'<div class="alert-error">❌ {result}</div>', unsafe_allow_html=True)
                     else:
-                        st.error(result)
-                else:
-                    st.warning("Please fill in all fields.")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    with auth_tab2:
-        st.markdown('<div class="auth-container">', unsafe_allow_html=True)
-        st.markdown('<h2 class="auth-header">Create Account</h2>', unsafe_allow_html=True)
-        
-        with st.form("register_form"):
-            reg_username = st.text_input("Username", placeholder="Choose a username")
-            reg_email = st.text_input("Email", placeholder="Enter your email")
-            reg_password = st.text_input("Password", type="password", placeholder="Create a password")
-            reg_confirm_password = st.text_input("Confirm Password", type="password", placeholder="Confirm your password")
-            register_btn = st.form_submit_button("📝 Register", use_container_width=True)
+                        st.markdown('<div class="alert-warning">⚠️ Please fill in all fields.</div>', unsafe_allow_html=True)
             
-            if register_btn:
-                if reg_username and reg_email and reg_password and reg_confirm_password:
-                    if reg_password == reg_confirm_password:
-                        success, message = register_user(reg_username, reg_email, reg_password)
-                        if success:
-                            st.success(message + " Please login with your credentials.")
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        with tab2:
+            st.markdown('<div class="auth-container">', unsafe_allow_html=True)
+            st.markdown('<h2 class="auth-header">Create Account</h2>', unsafe_allow_html=True)
+            
+            with st.form("register_form", clear_on_submit=False):
+                reg_username = st.text_input("Username", placeholder="Choose a username", key="reg_user")
+                reg_email = st.text_input("Email", placeholder="Enter your email", key="reg_email")
+                reg_password = st.text_input("Password", type="password", placeholder="Create a password", key="reg_pass")
+                reg_confirm_password = st.text_input("Confirm Password", type="password", placeholder="Confirm your password", key="reg_confirm")
+                register_btn = st.form_submit_button("📝 Register")
+                
+                if register_btn:
+                    if reg_username and reg_email and reg_password and reg_confirm_password:
+                        if reg_password == reg_confirm_password:
+                            if len(reg_password) >= 6:
+                                with st.spinner("Creating account..."):
+                                    success, message = register_user(reg_username, reg_email, reg_password)
+                                    if success:
+                                        st.markdown(f'<div class="alert-success">✅ {message} Please login with your credentials.</div>', unsafe_allow_html=True)
+                                    else:
+                                        st.markdown(f'<div class="alert-error">❌ {message}</div>', unsafe_allow_html=True)
+                            else:
+                                st.markdown('<div class="alert-warning">⚠️ Password must be at least 6 characters long.</div>', unsafe_allow_html=True)
                         else:
-                            st.error(message)
+                            st.markdown('<div class="alert-error">❌ Passwords do not match!</div>', unsafe_allow_html=True)
                     else:
-                        st.error("Passwords do not match!")
-                else:
-                    st.warning("Please fill in all fields.")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
+                        st.markdown('<div class="alert-warning">⚠️ Please fill in all fields.</div>', unsafe_allow_html=True)
+            
+            st.markdown('</div>', unsafe_allow_html=True)
     
-    # Add some information about the app
+    # Add information about the app
     st.markdown("---")
     st.markdown("""
     <div style="text-align: center; padding: 2rem;">
         <h3 style="color: #2E8B57;">🌿 About Our Cotton Disease Detection System</h3>
         <p style="font-size: 1.1rem; color: #555; line-height: 1.6;">
-            Our AI-powered system uses advanced machine learning to detect cotton diseases with 98.9% accuracy.
-            Join thousands of farmers who are already protecting their crops with our technology.
+            Our AI-powered system uses advanced machine learning to detect cotton diseases with high accuracy.
+            Join farmers who are already protecting their crops with our technology.
         </p>
-        <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
-            <div style="text-align: center;">
+        <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem; flex-wrap: wrap;">
+            <div style="text-align: center; min-width: 150px;">
                 <div style="font-size: 2rem; color: #2E8B57;">🎯</div>
-                <div style="font-weight: 600;">98.9% Accuracy</div>
+                <div style="font-weight: 600;">High Accuracy</div>
             </div>
-            <div style="text-align: center;">
+            <div style="text-align: center; min-width: 150px;">
                 <div style="font-size: 2rem; color: #2E8B57;">⚡</div>
                 <div style="font-weight: 600;">Instant Results</div>
             </div>
-            <div style="text-align: center;">
+            <div style="text-align: center; min-width: 150px;">
                 <div style="font-size: 2rem; color: #2E8B57;">🌱</div>
                 <div style="font-weight: 600;">9 Disease Types</div>
             </div>
@@ -663,54 +671,46 @@ if not st.session_state.authenticated:
 else:
     # Main application for authenticated users
     # Sidebar with user info and navigation
-    st.sidebar.markdown(f"""
-    <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #2E8B57, #90EE90); border-radius: 10px; margin-bottom: 1rem;">
-        <h3 style="color: white; margin: 0;">👋 Welcome!</h3>
-        <p style="color: white; margin: 0; font-weight: 500;">{st.session_state.user_data['username']}</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Navigation
-    st.sidebar.markdown("### 🧭 Navigation")
-    app_mode = st.sidebar.selectbox(
-        "Choose a page:",
-        ["🏠 Home", "🔍 Disease Recognition", "📊 Analytics", "📈 Prediction History", "ℹ️ About"],
-        help="Navigate through different sections of the app"
-    )
+    with st.sidebar:
+        st.markdown(f"""
+        <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #2E8B57, #90EE90); border-radius: 10px; margin-bottom: 1rem;">
+            <h3 style="color: white; margin: 0;">👋 Welcome!</h3>
+            <p style="color: white; margin: 0; font-weight: 500;">{st.session_state.user_data['username']}</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Navigation
+        st.markdown("### 🧭 Navigation")
+        app_mode = st.selectbox(
+            "Choose a page:",
+            ["🏠 Home", "🔍 Disease Recognition", "📊 Analytics", "📈 Prediction History", "ℹ️ About"],
+            help="Navigate through different sections of the app"
+        )
 
-    # Add model info
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### 🤖 Model Info")
-    st.sidebar.info("""
-    **Model Type:** CNN (TensorFlow)  
-    **Accuracy:** 98.9%  
-    **Classes:** 9 diseases  
-    **Image Size:** 128x128  
-    **Last Updated:** Aug 2025
-    """)
-    
-    # Logout button
-    st.sidebar.markdown("---")
-    if st.sidebar.button("🚪 Logout", key="logout_btn", help="Sign out of your account"):
-        logout()
+        # Add model info
+        st.markdown("---")
+        st.markdown("### 🤖 Model Info")
+        st.info("""
+        **Model Type:** CNN (TensorFlow)  
+        **Classes:** 9 diseases  
+        **Image Size:** 128x128  
+        **Last Updated:** Aug 2025
+        """)
+        
+        # Logout button
+        st.markdown("---")
+        if st.button("🚪 Logout", key="logout_btn", help="Sign out of your account"):
+            logout()
 
-    # Main content for authenticated users
+    # Main content based on selected page
     if app_mode == "🏠 Home":
         st.markdown('<h1 class="main-header">🌱 COTTON CROP DISEASE DETECTION SYSTEM 🌱</h1>', unsafe_allow_html=True)
         
-        # Hero section
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            if os.path.exists("home_page.png"):
-                st.image("home_page.png", use_column_width=True, caption="AI-Powered Cotton Disease Detection")
-        
-        st.markdown("---")
-        
         # Welcome message
-        st.markdown("""
-        <div style="text-align: center; font-size: 1.2rem; margin: 2rem 0;">
-            Welcome to our advanced AI-powered Cotton Disease Detection System! 🌿  
-            Protect your crops with cutting-edge machine learning technology.
+        st.markdown(f"""
+        <div style="text-align: center; font-size: 1.2rem; margin: 2rem 0; padding: 1.5rem; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(46, 139, 87, 0.1);">
+            Welcome back, <strong>{st.session_state.user_data['username']}</strong>! 🌿  
+            Use our AI-powered system to detect cotton diseases instantly.
         </div>
         """, unsafe_allow_html=True)
         
@@ -723,7 +723,7 @@ else:
             st.markdown("""
             <div class="feature-box">
                 <h3>🎯 High Accuracy</h3>
-                <p>98.9% accuracy with advanced CNN architecture trained on thousands of cotton images.</p>
+                <p>Advanced CNN architecture trained on thousands of cotton images for reliable disease detection.</p>
             </div>
             """, unsafe_allow_html=True)
         
@@ -742,172 +742,6 @@ else:
                 <p>Track your prediction history and analyze disease patterns with interactive charts and insights.</p>
             </div>
             """, unsafe_allow_html=True)
-        
-        # Disease categories overview
-        st.markdown("---")
-        st.markdown("## 🦠 Detectable Diseases")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("### 🟢 Parasitic Diseases")
-            st.markdown("- **Aphids**: Small insects causing leaf damage")
-            st.markdown("- **Army Worms**: Caterpillars eating leaves and bolls")
-            
-            st.markdown("### 🟡 Fungal Diseases")
-            st.markdown("- **Bacterial Blight**: Dark lesions on plant parts")
-            st.markdown("- **Cotton Boll Rot**: Fungal infection in bolls")
-            st.markdown("- **Powdery Mildew**: White powdery spots")
-        
-        with col2:
-            st.markdown("### 🔴 Viral Diseases")
-            st.markdown("- **Curl Virus**: Leaf curling and yellowing")
-            
-            st.markdown("### 🟠 Soil-borne Diseases")
-            st.markdown("- **Fusarium Wilt**: Wilting and plant death")
-            st.markdown("- **Target Spot**: Circular spots with rings")
-            
-            st.markdown("### ✅ Healthy Plants")
-            st.markdown("- **Healthy**: No visible disease symptoms")
-        
-        # Call-to-action
-        st.markdown("---")
-        st.markdown("""
-        <div style="text-align: center; background: linear-gradient(135deg, #2E8B57, #90EE90); padding: 2rem; border-radius: 10px; color: white;">
-            <h2>🚀 Ready to Protect Your Cotton Crops?</h2>
-            <p style="font-size: 1.1rem;">Upload an image and get instant AI-powered disease detection!</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    elif app_mode == "📊 Analytics":
-        st.markdown('<h1 class="main-header">📊 Analytics Dashboard</h1>', unsafe_allow_html=True)
-        
-        # Load user-specific prediction history
-        user_predictions = get_user_predictions(st.session_state.user_data['id'])
-        
-        if not user_predictions:
-            st.warning("No prediction history available for your account. Make some predictions first!")
-            st.info("Navigate to the Disease Recognition page to start making predictions.")
-        else:
-            # Convert to DataFrame for easier analysis
-            df = pd.DataFrame(user_predictions)
-            df['timestamp'] = pd.to_datetime(df['timestamp'])
-            
-            # Overview metrics
-            st.markdown("## 📈 Overview")
-            col1, col2, col3, col4 = st.columns(4)
-            
-            with col1:
-                st.markdown(f"""
-                <div class="metric-card">
-                    <span class="metric-number">{len(df)}</span>
-                    <div class="metric-label">Total Predictions</div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col2:
-                healthy_count = len(df[df['disease'] == 'Healthy'])
-                st.markdown(f"""
-                <div class="metric-card">
-                    <span class="metric-number">{healthy_count}</span>
-                    <div class="metric-label">Healthy Plants</div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col3:
-                infected_count = len(df[df['disease'] != 'Healthy'])
-                st.markdown(f"""
-                <div class="metric-card">
-                    <span class="metric-number">{infected_count}</span>
-                    <div class="metric-label">Infected Plants</div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col4:
-                avg_confidence = df['confidence'].mean()
-                st.markdown(f"""
-                <div class="metric-card">
-                    <span class="metric-number">{avg_confidence:.1%}</span>
-                    <div class="metric-label">Avg. Confidence</div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            st.markdown("---")
-            
-            # Charts
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                # Disease distribution pie chart
-                disease_counts = df['disease'].value_counts()
-                colors = ['#2E8B57' if disease == 'Healthy' else '#dc3545' for disease in disease_counts.index]
-                
-                fig_pie = px.pie(
-                    values=disease_counts.values,
-                    names=disease_counts.index,
-                    title="Disease Distribution",
-                    color_discrete_sequence=colors
-                )
-                fig_pie.update_layout(
-                    font=dict(size=14),
-                    title_font_size=18,
-                    showlegend=True
-                )
-                st.plotly_chart(fig_pie, use_container_width=True)
-            
-            with col2:
-                # Confidence distribution histogram
-                fig_hist = px.histogram(
-                    df,
-                    x='confidence',
-                    nbins=20,
-                    title="Confidence Score Distribution",
-                    color_discrete_sequence=['#2E8B57']
-                )
-                fig_hist.update_layout(
-                    xaxis_title="Confidence Score",
-                    yaxis_title="Count",
-                    font=dict(size=14),
-                    title_font_size=18
-                )
-                fig_hist.update_xaxis(tickformat='.0%')
-                st.plotly_chart(fig_hist, use_container_width=True)
-            
-            # Time series analysis
-            if len(df) > 1:
-                st.markdown("## 📅 Prediction Timeline")
-                
-                # Group by date
-                df['date'] = df['timestamp'].dt.date
-                daily_counts = df.groupby(['date', 'disease']).size().reset_index(name='count')
-                
-                fig_timeline = px.line(
-                    daily_counts,
-                    x='date',
-                    y='count',
-                    color='disease',
-                    title="Daily Prediction Counts by Disease Type",
-                    markers=True
-                )
-                fig_timeline.update_layout(
-                    font=dict(size=14),
-                    title_font_size=18,
-                    xaxis_title="Date",
-                    yaxis_title="Number of Predictions"
-                )
-                st.plotly_chart(fig_timeline, use_container_width=True)
-            
-            # Recent predictions table
-            st.markdown("## 🕒 Recent Predictions")
-            recent_df = df.head(10).copy()
-            recent_df['confidence'] = recent_df['confidence'].apply(lambda x: f"{x:.1%}")
-            recent_df['timestamp'] = recent_df['timestamp'].dt.strftime('%Y-%m-%d %H:%M')
-            
-            st.dataframe(
-                recent_df[['disease', 'confidence', 'timestamp']],
-                use_container_width=True,
-                hide_index=True
-            )
 
     elif app_mode == "🔍 Disease Recognition":
         st.markdown('<h1 class="main-header">🔍 Cotton Disease Recognition</h1>', unsafe_allow_html=True)
@@ -1105,30 +939,19 @@ else:
                 else:
                     st.error("❌ Failed to process the image. Please try uploading a different image.")
 
-    elif app_mode == "📈 Prediction History":
-        st.markdown('<h1 class="main-header">📈 Your Prediction History</h1>', unsafe_allow_html=True)
+    elif app_mode == "📊 Analytics":
+        st.markdown('<h1 class="main-header">📊 Analytics Dashboard</h1>', unsafe_allow_html=True)
         
-        # Load user-specific prediction history
+        # Load user predictions
         user_predictions = get_user_predictions(st.session_state.user_data['id'])
         
         if not user_predictions:
-            st.info("""
-            📝 **No predictions yet!**
-            
-            You haven't made any disease predictions yet. Start by uploading cotton leaf images 
-            in the Disease Recognition section to build your prediction history.
-            """)
-            
-            if st.button("🔍 Go to Disease Recognition", use_container_width=True):
-                st.rerun()
+            st.warning("No prediction history available. Make some predictions first!")
         else:
-            # Convert to DataFrame
             df = pd.DataFrame(user_predictions)
             df['timestamp'] = pd.to_datetime(df['timestamp'])
             
-            # Summary statistics
-            st.markdown("## 📊 Summary Statistics")
-            
+            # Overview metrics
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
@@ -1140,141 +963,80 @@ else:
             
             with col3:
                 infected_count = len(df[df['disease'] != 'Healthy'])
-                st.metric("Diseases Detected", infected_count)
+                st.metric("Infected Plants", infected_count)
             
             with col4:
                 avg_confidence = df['confidence'].mean()
                 st.metric("Avg. Confidence", f"{avg_confidence:.1%}")
             
-            # Filter options
-            st.markdown("---")
-            st.markdown("## 🔍 Filter Predictions")
-            
-            col1, col2, col3 = st.columns(3)
+            # Charts
+            col1, col2 = st.columns(2)
             
             with col1:
-                # Disease filter
-                disease_options = ['All'] + sorted(df['disease'].unique().tolist())
-                selected_disease = st.selectbox("Filter by Disease", disease_options)
+                # Disease distribution pie chart
+                disease_counts = df['disease'].value_counts()
+                colors = ['#2E8B57' if disease == 'Healthy' else '#dc3545' for disease in disease_counts.index]
+                
+                fig_pie = px.pie(
+                    values=disease_counts.values,
+                    names=disease_counts.index,
+                    title="Disease Distribution",
+                    color_discrete_sequence=colors
+                )
+                fig_pie.update_layout(
+                    font=dict(size=14),
+                    title_font_size=18,
+                    showlegend=True
+                )
+                st.plotly_chart(fig_pie, use_container_width=True)
             
             with col2:
-                # Date range filter
-                min_date = df['timestamp'].dt.date.min()
-                max_date = df['timestamp'].dt.date.max()
-                date_range = st.date_input(
-                    "Date Range",
-                    value=(min_date, max_date),
-                    min_value=min_date,
-                    max_value=max_date
+                # Confidence distribution histogram
+                fig_hist = px.histogram(
+                    df,
+                    x='confidence',
+                    nbins=20,
+                    title="Confidence Score Distribution",
+                    color_discrete_sequence=['#2E8B57']
                 )
+                fig_hist.update_layout(
+                    xaxis_title="Confidence Score",
+                    yaxis_title="Count",
+                    font=dict(size=14),
+                    title_font_size=18
+                )
+                fig_hist.update_xaxis(tickformat='.0%')
+                st.plotly_chart(fig_hist, use_container_width=True)
+
+    elif app_mode == "📈 Prediction History":
+        st.markdown('<h1 class="main-header">📈 Your Prediction History</h1>', unsafe_allow_html=True)
+        
+        user_predictions = get_user_predictions(st.session_state.user_data['id'])
+        
+        if not user_predictions:
+            st.info("No predictions yet! Start by uploading cotton leaf images.")
+        else:
+            df = pd.DataFrame(user_predictions)
+            df['timestamp'] = pd.to_datetime(df['timestamp'])
             
-            with col3:
-                # Confidence filter
-                min_confidence = st.slider("Minimum Confidence", 0.0, 1.0, 0.0, 0.1)
+            # Display recent predictions
+            st.markdown("## Recent Predictions")
             
-            # Apply filters
-            filtered_df = df.copy()
-            
-            if selected_disease != 'All':
-                filtered_df = filtered_df[filtered_df['disease'] == selected_disease]
-            
-            if isinstance(date_range, tuple) and len(date_range) == 2:
-                start_date, end_date = date_range
-                filtered_df = filtered_df[
-                    (filtered_df['timestamp'].dt.date >= start_date) &
-                    (filtered_df['timestamp'].dt.date <= end_date)
-                ]
-            
-            filtered_df = filtered_df[filtered_df['confidence'] >= min_confidence]
-            
-            # Display filtered results
-            st.markdown("---")
-            st.markdown(f"## 📋 Prediction History ({len(filtered_df)} records)")
-            
-            if len(filtered_df) == 0:
-                st.warning("No predictions match the selected filters.")
-            else:
-                # Pagination
-                items_per_page = 10
-                total_pages = (len(filtered_df) - 1) // items_per_page + 1
+            for i, row in df.head(10).iterrows():
+                col1, col2, col3, col4 = st.columns([3, 1, 1, 2])
                 
-                if total_pages > 1:
-                    col1, col2, col3 = st.columns([1, 2, 1])
-                    with col2:
-                        page = st.selectbox(
-                            f"Page (showing {items_per_page} per page)",
-                            range(1, total_pages + 1),
-                            format_func=lambda x: f"Page {x} of {total_pages}"
-                        )
-                else:
-                    page = 1
+                with col1:
+                    st.write(f"**{row['disease']}**")
                 
-                # Calculate start and end indices
-                start_idx = (page - 1) * items_per_page
-                end_idx = start_idx + items_per_page
-                page_df = filtered_df.iloc[start_idx:end_idx]
+                with col2:
+                    st.write(f"{row['confidence']:.1%}")
                 
-                # Display predictions
-                for idx, row in page_df.iterrows():
-                    with st.container():
-                        col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
-                        
-                        with col1:
-                            disease_color = disease_info.get(row['disease'], {}).get('color', '#666666')
-                            st.markdown(f"""
-                            <div style="padding: 1rem; border-left: 4px solid {disease_color}; background: white; border-radius: 5px; margin: 0.5rem 0;">
-                                <h4 style="margin: 0; color: {disease_color};">{row['disease']}</h4>
-                                <p style="margin: 0.5rem 0; color: #666;">Image: {row['image_name']}</p>
-                            </div>
-                            """, unsafe_allow_html=True)
-                        
-                        with col2:
-                            confidence_color = "#28a745" if row['confidence'] > 0.8 else "#ffc107" if row['confidence'] > 0.6 else "#dc3545"
-                            st.markdown(f"""
-                            <div style="text-align: center; padding: 1rem;">
-                                <div style="font-size: 1.5rem; font-weight: bold; color: {confidence_color};">
-                                    {row['confidence']:.1%}
-                                </div>
-                                <div style="color: #666; font-size: 0.9rem;">Confidence</div>
-                            </div>
-                            """, unsafe_allow_html=True)
-                        
-                        with col3:
-                            severity = disease_info.get(row['disease'], {}).get('severity', 'Unknown')
-                            severity_color = {"None": "#28a745", "Low": "#28a745", "Medium": "#ffc107", "High": "#dc3545", "Very High": "#8b0000"}.get(severity, "#666666")
-                            st.markdown(f"""
-                            <div style="text-align: center; padding: 1rem;">
-                                <div style="font-weight: bold; color: {severity_color};">
-                                    {severity}
-                                </div>
-                                <div style="color: #666; font-size: 0.9rem;">Risk Level</div>
-                            </div>
-                            """, unsafe_allow_html=True)
-                        
-                        with col4:
-                            formatted_date = row['timestamp'].strftime('%Y-%m-%d')
-                            formatted_time = row['timestamp'].strftime('%H:%M')
-                            st.markdown(f"""
-                            <div style="text-align: center; padding: 1rem;">
-                                <div style="font-weight: bold;">{formatted_date}</div>
-                                <div style="color: #666; font-size: 0.9rem;">{formatted_time}</div>
-                            </div>
-                            """, unsafe_allow_html=True)
+                with col3:
+                    severity = disease_info.get(row['disease'], {}).get('severity', 'Unknown')
+                    st.write(severity)
                 
-                # Export option
-                st.markdown("---")
-                if st.button("📥 Export History to CSV", help="Download your prediction history as CSV"):
-                    csv_data = filtered_df.copy()
-                    csv_data['timestamp'] = csv_data['timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
-                    csv_data['confidence'] = csv_data['confidence'].apply(lambda x: f"{x:.3f}")
-                    
-                    csv_string = csv_data.to_csv(index=False)
-                    st.download_button(
-                        label="💾 Download CSV",
-                        data=csv_string,
-                        file_name=f"cotton_disease_predictions_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                        mime="text/csv"
-                    )
+                with col4:
+                    st.write(row['timestamp'].strftime('%Y-%m-%d %H:%M'))
 
     elif app_mode == "ℹ️ About":
         st.markdown('<h1 class="main-header">ℹ️ About Cotton Disease Detection System</h1>', unsafe_allow_html=True)
@@ -1499,11 +1261,11 @@ else:
             with col1 if i % 2 == 0 else col2:
                 st.markdown(f"**{key}:** {value}")
 
-# Add footer
+# Footer
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #666; font-size: 0.9rem; padding: 1rem;">
-    🌱 Cotton Disease Detection System v2.1.0 | Powered by AI & Machine Learning<br>
-    © 2025 Agricultural Technology Solutions. All rights reserved.
+    🌱 Cotton Disease Detection System v2.0
 </div>
 """, unsafe_allow_html=True)
+
