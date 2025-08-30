@@ -1,0 +1,27 @@
+[
+  {
+    "disease": "Healthy",
+    "confidence": 0.92,
+    "timestamp": "2025-08-30T10:15:30"
+  },
+  {
+    "disease": "Infected-Aphids",
+    "confidence": 0.87,
+    "timestamp": "2025-08-30T11:22:45"
+  },
+  {
+    "disease": "Healthy",
+    "confidence": 0.95,
+    "timestamp": "2025-08-30T12:30:15"
+  },
+  {
+    "disease": "Infected-Powdery mildew",
+    "confidence": 0.83,
+    "timestamp": "2025-08-30T14:45:22"
+  },
+  {
+    "disease": "Healthy",
+    "confidence": 0.89,
+    "timestamp": "2025-08-30T15:12:08"
+  }
+]
